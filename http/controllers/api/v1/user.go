@@ -17,12 +17,23 @@
 package v1
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/primasio/wormhole/cache"
 	"github.com/primasio/wormhole/db"
+	"github.com/primasio/wormhole/http/middlewares"
 	"github.com/primasio/wormhole/models"
+	"log"
+	"strconv"
 )
 
 type UserController struct{}
+
+type LoginForm struct {
+	Username string `form:"username" json:"username" binding:"required"`
+	Password string `form:"password" json:"password" binding:"required"`
+	Remember string `form:"remember" json:"remember"`
+}
 
 func (ctrl *UserController) Create(c *gin.Context) {
 
@@ -59,9 +70,74 @@ func (ctrl *UserController) Create(c *gin.Context) {
 }
 
 func (ctrl *UserController) Get(c *gin.Context) {
-	Success("Get user data", c)
+
+	userId, exists := c.Get(middlewares.AuthorizedUserId)
+
+	if !exists {
+		Error("User not found", c)
+		return
+	}
+
+	user := &models.User{}
+	userIdInt, err2 := strconv.Atoi(fmt.Sprintf("%s", userId))
+
+	if err2 != nil {
+		log.Fatal(err2)
+		Error("User not found", c)
+		return
+	}
+
+	user.ID = uint(userIdInt)
+
+	dbi := db.GetDb()
+	dbi.First(&user)
+
+	if user.Username == "" {
+		Error("User not found", c)
+		return
+	}
+
+	Success(user, c)
 }
 
 func (ctrl *UserController) Auth(c *gin.Context) {
-	Success("Get token", c)
+
+	var login LoginForm
+
+	if err := c.ShouldBind(&login); err != nil {
+		Error(err.Error(), c)
+	} else {
+
+		user := &models.User{Username: login.Username}
+
+		dbi := db.GetDb()
+		dbi.First(&user)
+
+		if user.ID == 0 {
+			Error("User not found", c)
+			return
+		}
+
+		if !user.VerifyPassword(login.Password) {
+			Error("Incorrect password", c)
+		} else {
+
+			// Login success, generate token
+			err, token := cache.NewSessionKey()
+
+			if err != nil {
+				log.Fatal(err)
+				c.AbortWithStatus(500)
+				return
+			}
+
+			userIdStr := fmt.Sprint(user.ID)
+			cache.SessionSet(token, userIdStr, login.Remember == "")
+
+			tokenStruct := make(map[string]string)
+			tokenStruct["token"] = token
+
+			Success(tokenStruct, c)
+		}
+	}
 }

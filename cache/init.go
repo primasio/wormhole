@@ -14,41 +14,33 @@
  * limitations under the License.
  */
 
-package middlewares
+package cache
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/primasio/wormhole/cache"
-	"log"
+	"github.com/gin-contrib/cache/persistence"
+	"github.com/primasio/wormhole/config"
+	"time"
 )
 
-const AuthorizedUserId = "UserId"
+var cacheStore persistence.CacheStore
 
-func AuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func InitCache() {
+	c := config.GetConfig()
 
-		reqToken := c.Request.Header.Get("Authorization")
+	cacheType := c.GetString("cache.type")
 
-		if reqToken == "" {
-			c.AbortWithStatus(401)
-			return
-		}
+	if cacheType == "memory" {
+		cacheStore = persistence.NewInMemoryStore(time.Second)
+	} else {
 
-		// Check token validity
+		host := c.GetString("cache.host")
+		port := c.GetString("cache.port")
+		password := c.GetString("cache.password")
 
-		if err, userId := cache.SessionGet(reqToken); err != nil {
-
-			log.Fatal(err)
-			c.AbortWithStatus(500)
-
-		} else {
-
-			if userId == "" {
-				c.AbortWithStatus(401)
-			} else {
-				c.Set(AuthorizedUserId, userId)
-				c.Next()
-			}
-		}
+		cacheStore = persistence.NewRedisCache(host+":"+port, password, time.Second)
 	}
+}
+
+func GetCache() persistence.CacheStore {
+	return cacheStore
 }

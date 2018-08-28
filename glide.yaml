@@ -11,6 +11,7 @@ import:
   version: v1.1.0
 - package: github.com/jinzhu/gorm
   version: v1.9.1
-- package: golang.org/x/crypto
 - package: github.com/mattn/go-sqlite3
   version: v1.9.0
+- package: github.com/gin-contrib/cache
+  version: v1.0

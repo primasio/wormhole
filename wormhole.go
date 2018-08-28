@@ -19,6 +19,7 @@ package wormhole
 import (
 	"flag"
 	"fmt"
+	"github.com/primasio/wormhole/cache"
 	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/http/server"
@@ -29,7 +30,6 @@ import (
 func main() {
 
 	// Init Environment
-
 	environment := flag.String("e", "dev", "")
 	flag.Usage = func() {
 		fmt.Println("Usage: wormhole -e {mode}")
@@ -46,6 +46,9 @@ func main() {
 		log.Println(err)
 		os.Exit(1)
 	}
+
+	// Init Cache
+	cache.InitCache()
 
 	// Start HTTP server
 	server.Init()

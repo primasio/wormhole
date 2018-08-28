@@ -14,41 +14,10 @@
  * limitations under the License.
  */
 
-package middlewares
+package cache_test
 
-import (
-	"github.com/gin-gonic/gin"
-	"github.com/primasio/wormhole/cache"
-	"log"
-)
+import "testing"
 
-const AuthorizedUserId = "UserId"
+func TestSession(t *testing.T) {
 
-func AuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-		reqToken := c.Request.Header.Get("Authorization")
-
-		if reqToken == "" {
-			c.AbortWithStatus(401)
-			return
-		}
-
-		// Check token validity
-
-		if err, userId := cache.SessionGet(reqToken); err != nil {
-
-			log.Fatal(err)
-			c.AbortWithStatus(500)
-
-		} else {
-
-			if userId == "" {
-				c.AbortWithStatus(401)
-			} else {
-				c.Set(AuthorizedUserId, userId)
-				c.Next()
-			}
-		}
-	}
 }

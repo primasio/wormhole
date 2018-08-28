@@ -72,6 +72,50 @@ func TestUserController_Create(t *testing.T) {
 
 func TestUserController_Auth(t *testing.T) {
 
+	tests.InitTestEnv("../../../../config/")
+	router := server.NewRouter()
+	w := httptest.NewRecorder()
+
+	// Test normal creation
+
+	user, err := tests.CreateTestUser()
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	data := url.Values{}
+	data.Set("username", user.Username)
+	data.Set("password", user.Password)
+	data.Set("nickname", user.Nickname)
+
+	req, _ := http.NewRequest("POST", "/v1/users", strings.NewReader(data.Encode()))
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+
+	router.ServeHTTP(w, req)
+
+	log.Println(w.Body.String())
+	assert.Equal(t, w.Code, 200)
+
+	// Login using this user
+
+	w2 := httptest.NewRecorder()
+
+	login := url.Values{}
+	login.Set("username", user.Username)
+	login.Set("password", user.Password)
+	login.Set("remember", "on")
+
+	req2, _ := http.NewRequest("POST", "/v1/users/auth", strings.NewReader(login.Encode()))
+	req2.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req2.Header.Add("Content-Length", strconv.Itoa(len(login.Encode())))
+
+	router.ServeHTTP(w2, req2)
+
+	log.Println(w2.Body.String())
+	assert.Equal(t, w2.Code, 200)
 }
 
 func TestUserController_Get(t *testing.T) {
