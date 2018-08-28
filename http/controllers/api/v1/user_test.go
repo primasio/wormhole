@@ -34,6 +34,8 @@ func TestUserController_Create(t *testing.T) {
 	router := server.NewRouter()
 	w := httptest.NewRecorder()
 
+	// Test normal creation
+
 	user, err := tests.CreateTestUser()
 
 	if err != nil {
@@ -42,9 +44,9 @@ func TestUserController_Create(t *testing.T) {
 	}
 
 	data := url.Values{}
-	data.Set("Username", user.Username)
-	data.Set("Password", user.Password)
-	data.Set("Nickname", user.Nickname)
+	data.Set("username", user.Username)
+	data.Set("password", user.Password)
+	data.Set("nickname", user.Nickname)
 
 	req, _ := http.NewRequest("POST", "/v1/users", strings.NewReader(data.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -54,6 +56,18 @@ func TestUserController_Create(t *testing.T) {
 
 	log.Println(w.Body.String())
 	assert.Equal(t, w.Code, 200)
+
+	// Test duplicated user creation
+
+	w2 := httptest.NewRecorder()
+
+	req2, _ := http.NewRequest("POST", "/v1/users", strings.NewReader(data.Encode()))
+	req2.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req2.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+	router.ServeHTTP(w2, req2)
+
+	log.Println(w2.Body.String())
+	assert.Equal(t, w2.Code, 400)
 }
 
 func TestUserController_Auth(t *testing.T) {

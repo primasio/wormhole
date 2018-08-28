@@ -16,8 +16,20 @@
 
 package models
 
+import "time"
+
 type BaseModel struct {
 	ID        uint `gorm:"primary_key"`
 	CreatedAt uint
 	UpdatedAt uint
+}
+
+func (model *BaseModel) BeforeCreate() error {
+	model.CreatedAt = uint(time.Now().Unix())
+	return nil
+}
+
+func (model *BaseModel) BeforeUpdate() error {
+	model.UpdatedAt = uint(time.Now().Unix())
+	return nil
 }

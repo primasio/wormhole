@@ -18,6 +18,7 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
@@ -27,4 +28,9 @@ func Error(msg string, c *gin.Context) {
 
 func Success(data interface{}, c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})
+}
+
+func ErrorServer(err error, c *gin.Context) {
+	log.Fatal(err)
+	c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Internal Server Error"})
 }

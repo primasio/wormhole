@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package middlewares
+package models
 
-import (
-	"github.com/gin-gonic/gin"
-)
+import "github.com/primasio/wormhole/db"
 
-func AuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func AutoMigrateModels() {
+	dbi := db.GetDb()
 
-		reqToken := c.Request.Header.Get("X-Auth-Token")
-
-		if reqToken == "" {
-			c.AbortWithStatus(401)
-			return
-		}
-
-		// TODO: Check token validity
-
-		c.Next()
-	}
+	dbi.AutoMigrate(&User{})
 }

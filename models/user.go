@@ -16,31 +16,56 @@
 
 package models
 
+import (
+	"encoding/hex"
+	"github.com/primasio/wormhole/util"
+	"golang.org/x/crypto/sha3"
+	"time"
+)
+
 type User struct {
 	BaseModel
-
 	Username string `form:"username" json:"username" binding:"required"`
-	Password string `form:"password" json:"password"`
+	Password string `form:"password" json:"password" binding:"required"`
 	Salt     string `binding:"-"`
-	Nickname string `form:"nickname" json:"nickname"`
+	Nickname string `form:"nickname" json:"nickname" binding:"required"`
 }
 
-func NewUser(username, password, nickname string) *User {
-
-	user := &User{}
-
-	user.Username = username
-	user.Nickname = nickname
-
-	user.Password = password
-
-	return user
+func (user *User) VerifyPassword(password string) bool {
+	return user.Password == user.getPasswordHash(password)
 }
 
-func (user *User) SetPassword(password string) {
+func (user *User) hashPassword() {
+	user.Password = user.getPasswordHash(user.Password)
+}
 
+func (user *User) getPasswordHash(password string) string {
+
+	// Password hash = sha3(sha3(password) + salt)
+
+	hash := sha3.New256()
+	hashByte := hash.Sum([]byte(password))
+
+	saltByte := []byte(user.Salt)
+
+	finalByteStr := append(hashByte, saltByte...)
+
+	hash.Reset()
+	finalByte := hash.Sum(finalByteStr)
+
+	return hex.EncodeToString(finalByte)
 }
 
 func (user *User) setSalt() {
+	user.Salt = util.RandString(8)
+}
 
+func (user *User) BeforeCreate() error {
+
+	user.CreatedAt = uint(time.Now().Unix())
+
+	user.setSalt()
+	user.hashPassword()
+
+	return nil
 }
