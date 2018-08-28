@@ -1,0 +1,9 @@
+---
+package: github.com/primasio/wormhole
+import:
+- package: github.com/gin-gonic/gin
+  version: v1.3.0
+- package: github.com/spf13/viper
+  version: v1.1.0
+- package: github.com/jinzhu/gorm
+  version: v1.9.1
