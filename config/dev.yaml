@@ -2,3 +2,8 @@
 db:
   type: sqlite3
   connection: data/db.sqlite
+
+http:
+  server:
+    host: 127.0.0.1
+    port: 8080

@@ -14,39 +14,34 @@
  * limitations under the License.
  */
 
-package wormhole
+package middlewares
 
 import (
-	"flag"
-	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/primasio/wormhole/config"
-	"github.com/primasio/wormhole/db"
-	"github.com/primasio/wormhole/http/server"
 	"log"
-	"os"
 )
 
-func main() {
-
-	// Init Environment
-
-	environment := flag.String("e", "dev", "")
-	flag.Usage = func() {
-		fmt.Println("Usage: wormhole -e {mode}")
-		os.Exit(1)
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		cfg := config.GetConfig()
+		reqKey := c.Request.Header.Get("X-Auth-Key")
+		reqSecret := c.Request.Header.Get("X-Auth-Secret")
+		key := cfg.GetString("http.auth.key")
+		secret := cfg.GetString("http.auth.secret")
+		if reqKey == "" || reqSecret == "" {
+			c.AbortWithStatus(401)
+			return
+		}
+		if key == "" || secret == "" {
+			c.AbortWithStatus(500)
+			log.Println("key and secret credentials not found on config file")
+			return
+		}
+		if key != reqKey || secret != reqSecret {
+			c.AbortWithStatus(401)
+			return
+		}
+		c.Next()
 	}
-
-	flag.Parse()
-
-	// Init Config
-	config.Init(*environment, nil)
-
-	// Init Database
-	if err := db.Init(); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-
-	// Start HTTP server
-	server.Init()
 }

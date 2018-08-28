@@ -14,39 +14,17 @@
  * limitations under the License.
  */
 
-package wormhole
+package v1
 
 import (
-	"flag"
-	"fmt"
-	"github.com/primasio/wormhole/config"
-	"github.com/primasio/wormhole/db"
-	"github.com/primasio/wormhole/http/server"
-	"log"
-	"os"
+	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-func main() {
+func Error(msg string, c *gin.Context) {
+	c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": msg})
+}
 
-	// Init Environment
-
-	environment := flag.String("e", "dev", "")
-	flag.Usage = func() {
-		fmt.Println("Usage: wormhole -e {mode}")
-		os.Exit(1)
-	}
-
-	flag.Parse()
-
-	// Init Config
-	config.Init(*environment, nil)
-
-	// Init Database
-	if err := db.Init(); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-
-	// Start HTTP server
-	server.Init()
+func Success(data interface{}, c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})
 }

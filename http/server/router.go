@@ -14,39 +14,35 @@
  * limitations under the License.
  */
 
-package wormhole
+package server
 
 import (
-	"flag"
-	"fmt"
-	"github.com/primasio/wormhole/config"
-	"github.com/primasio/wormhole/db"
-	"github.com/primasio/wormhole/http/server"
-	"log"
-	"os"
+	"github.com/gin-gonic/gin"
+	"github.com/primasio/wormhole/http/controllers/api/v1"
+	"github.com/primasio/wormhole/http/middlewares"
 )
 
-func main() {
+func NewRouter() *gin.Engine {
 
-	// Init Environment
+	gin.DisableConsoleColor()
 
-	environment := flag.String("e", "dev", "")
-	flag.Usage = func() {
-		fmt.Println("Usage: wormhole -e {mode}")
-		os.Exit(1)
+	router := gin.New()
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+	router.Use(SetResponseHeader())
+
+	v1g := router.Group("v1")
+	{
+		userGroup := v1g.Group("users")
+		userCtrl := new(v1.UserController)
+
+		userGroup.POST("/auth", userCtrl.Auth)
+
+		userGroup.Use(middlewares.AuthMiddleware())
+		{
+			userGroup.GET("", userCtrl.Get)
+		}
 	}
 
-	flag.Parse()
-
-	// Init Config
-	config.Init(*environment, nil)
-
-	// Init Database
-	if err := db.Init(); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-
-	// Start HTTP server
-	server.Init()
+	return router
 }

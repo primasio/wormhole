@@ -14,39 +14,12 @@
  * limitations under the License.
  */
 
-package wormhole
+package server
 
-import (
-	"flag"
-	"fmt"
-	"github.com/primasio/wormhole/config"
-	"github.com/primasio/wormhole/db"
-	"github.com/primasio/wormhole/http/server"
-	"log"
-	"os"
-)
+import "github.com/primasio/wormhole/config"
 
-func main() {
-
-	// Init Environment
-
-	environment := flag.String("e", "dev", "")
-	flag.Usage = func() {
-		fmt.Println("Usage: wormhole -e {mode}")
-		os.Exit(1)
-	}
-
-	flag.Parse()
-
-	// Init Config
-	config.Init(*environment, nil)
-
-	// Init Database
-	if err := db.Init(); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-
-	// Start HTTP server
-	server.Init()
+func Init() {
+	c := config.GetConfig()
+	r := NewRouter()
+	r.Run(c.GetString("http.server.host") + ":" + c.GetString("http.server.port"))
 }

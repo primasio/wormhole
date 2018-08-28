@@ -14,39 +14,16 @@
  * limitations under the License.
  */
 
-package wormhole
+package v1
 
-import (
-	"flag"
-	"fmt"
-	"github.com/primasio/wormhole/config"
-	"github.com/primasio/wormhole/db"
-	"github.com/primasio/wormhole/http/server"
-	"log"
-	"os"
-)
+import "github.com/gin-gonic/gin"
 
-func main() {
+type UserController struct{}
 
-	// Init Environment
+func (ctrl *UserController) Get(c *gin.Context) {
+	Success("Get user data", c)
+}
 
-	environment := flag.String("e", "dev", "")
-	flag.Usage = func() {
-		fmt.Println("Usage: wormhole -e {mode}")
-		os.Exit(1)
-	}
-
-	flag.Parse()
-
-	// Init Config
-	config.Init(*environment, nil)
-
-	// Init Database
-	if err := db.Init(); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-
-	// Start HTTP server
-	server.Init()
+func (ctrl *UserController) Auth(c *gin.Context) {
+	Success("Get token", c)
 }
