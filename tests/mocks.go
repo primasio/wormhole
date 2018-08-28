@@ -14,36 +14,25 @@
  * limitations under the License.
  */
 
-package server
+package tests
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/primasio/wormhole/http/controllers/api/v1"
-	"github.com/primasio/wormhole/http/middlewares"
+	"github.com/primasio/wormhole/models"
+	"github.com/primasio/wormhole/util"
+	"log"
 )
 
-func NewRouter() *gin.Engine {
+func CreateTestUser() (user *models.User, err error) {
 
-	gin.DisableConsoleColor()
+	u := &models.User{}
 
-	router := gin.New()
-	router.Use(gin.Logger())
-	router.Use(gin.Recovery())
-	router.Use(SetResponseHeader())
+	randStr := util.RandString(5)
 
-	v1g := router.Group("v1")
-	{
-		userGroup := v1g.Group("users")
-		userCtrl := new(v1.UserController)
+	u.Username = "test_user_" + randStr
+	u.Nickname = "Test User " + randStr
+	u.Password = "PrimasGoGoGo"
 
-		userGroup.POST("/auth", userCtrl.Auth)
-		userGroup.POST("", userCtrl.Create)
+	log.Println("Created test user: " + u.Username)
 
-		userGroup.Use(middlewares.AuthMiddleware())
-		{
-			userGroup.GET("", userCtrl.Get)
-		}
-	}
-
-	return router
+	return u, nil
 }

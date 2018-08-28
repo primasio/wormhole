@@ -14,36 +14,33 @@
  * limitations under the License.
  */
 
-package server
+package models
 
-import (
-	"github.com/gin-gonic/gin"
-	"github.com/primasio/wormhole/http/controllers/api/v1"
-	"github.com/primasio/wormhole/http/middlewares"
-)
+type User struct {
+	BaseModel
 
-func NewRouter() *gin.Engine {
+	Username string `form:"username" json:"username" binding:"required"`
+	Password string `form:"password" json:"password"`
+	Salt     string `binding:"-"`
+	Nickname string `form:"nickname" json:"nickname"`
+}
 
-	gin.DisableConsoleColor()
+func NewUser(username, password, nickname string) *User {
 
-	router := gin.New()
-	router.Use(gin.Logger())
-	router.Use(gin.Recovery())
-	router.Use(SetResponseHeader())
+	user := &User{}
 
-	v1g := router.Group("v1")
-	{
-		userGroup := v1g.Group("users")
-		userCtrl := new(v1.UserController)
+	user.Username = username
+	user.Nickname = nickname
 
-		userGroup.POST("/auth", userCtrl.Auth)
-		userGroup.POST("", userCtrl.Create)
+	user.Password = password
 
-		userGroup.Use(middlewares.AuthMiddleware())
-		{
-			userGroup.GET("", userCtrl.Get)
-		}
-	}
+	return user
+}
 
-	return router
+func (user *User) SetPassword(password string) {
+
+}
+
+func (user *User) setSalt() {
+
 }

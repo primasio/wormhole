@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package v1
+package models
 
-import "github.com/gin-gonic/gin"
-
-type UserController struct{}
-
-func (ctrl *UserController) Create(c *gin.Context) {
-	Success("User created", c)
-}
-
-func (ctrl *UserController) Get(c *gin.Context) {
-	Success("Get user data", c)
-}
-
-func (ctrl *UserController) Auth(c *gin.Context) {
-	Success("Get token", c)
+type BaseModel struct {
+	ID        uint `gorm:"primary_key"`
+	CreatedAt uint
+	UpdatedAt uint
 }

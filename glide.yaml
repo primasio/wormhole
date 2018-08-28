@@ -1,5 +1,9 @@
----
 package: github.com/primasio/wormhole
+ignore:
+- golang.org/x/sys/unix
+- golang.org/x/text/unicode/norm
+- golang.org/x/text/transform
+- golang.org/x/crypto
 import:
 - package: github.com/gin-gonic/gin
   version: v1.3.0

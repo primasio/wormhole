@@ -14,36 +14,18 @@
  * limitations under the License.
  */
 
-package server
+package util
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/primasio/wormhole/http/controllers/api/v1"
-	"github.com/primasio/wormhole/http/middlewares"
+	"math/rand"
 )
 
-func NewRouter() *gin.Engine {
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-	gin.DisableConsoleColor()
-
-	router := gin.New()
-	router.Use(gin.Logger())
-	router.Use(gin.Recovery())
-	router.Use(SetResponseHeader())
-
-	v1g := router.Group("v1")
-	{
-		userGroup := v1g.Group("users")
-		userCtrl := new(v1.UserController)
-
-		userGroup.POST("/auth", userCtrl.Auth)
-		userGroup.POST("", userCtrl.Create)
-
-		userGroup.Use(middlewares.AuthMiddleware())
-		{
-			userGroup.GET("", userCtrl.Get)
-		}
+func RandString(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
-
-	return router
+	return string(b)
 }
