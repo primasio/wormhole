@@ -34,3 +34,7 @@ func ErrorServer(err error, c *gin.Context) {
 	log.Fatal(err)
 	c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Internal Server Error"})
 }
+
+func ErrorUnauthorized(msg string, c *gin.Context) {
+	c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": msg})
+}

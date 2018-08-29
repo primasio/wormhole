@@ -43,12 +43,13 @@ func main() {
 
 	// Init Database
 	if err := db.Init(); err != nil {
-		log.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	// Init Cache
-	cache.InitCache()
+	if err := cache.InitCache(); err != nil {
+		log.Fatal(err)
+	}
 
 	// Start HTTP server
 	server.Init()

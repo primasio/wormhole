@@ -17,6 +17,7 @@
 package v1_test
 
 import (
+	"encoding/json"
 	"github.com/magiconair/properties/assert"
 	"github.com/primasio/wormhole/http/server"
 	"github.com/primasio/wormhole/tests"
@@ -116,8 +117,110 @@ func TestUserController_Auth(t *testing.T) {
 
 	log.Println(w2.Body.String())
 	assert.Equal(t, w2.Code, 200)
+
+	// Invalid Credential
+
+	w3 := httptest.NewRecorder()
+
+	login2 := url.Values{}
+	login2.Set("username", user.Username)
+	login2.Set("password", "wrong_password")
+	login2.Set("remember", "on")
+
+	req3, _ := http.NewRequest("POST", "/v1/users/auth", strings.NewReader(login2.Encode()))
+	req3.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req3.Header.Add("Content-Length", strconv.Itoa(len(login2.Encode())))
+
+	router.ServeHTTP(w3, req3)
+
+	log.Println(w3.Body.String())
+	assert.Equal(t, w3.Code, 401)
 }
 
 func TestUserController_Get(t *testing.T) {
 
+	tests.InitTestEnv("../../../../config/")
+	router := server.NewRouter()
+	w := httptest.NewRecorder()
+
+	// Create a user
+
+	user, err := tests.CreateTestUser()
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	data := url.Values{}
+	data.Set("username", user.Username)
+	data.Set("password", user.Password)
+	data.Set("nickname", user.Nickname)
+
+	req, _ := http.NewRequest("POST", "/v1/users", strings.NewReader(data.Encode()))
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+
+	router.ServeHTTP(w, req)
+
+	log.Println(w.Body.String())
+	assert.Equal(t, w.Code, 200)
+
+	// Login using this user
+
+	w2 := httptest.NewRecorder()
+
+	login := url.Values{}
+	login.Set("username", user.Username)
+	login.Set("password", user.Password)
+	login.Set("remember", "on")
+
+	req2, _ := http.NewRequest("POST", "/v1/users/auth", strings.NewReader(login.Encode()))
+	req2.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req2.Header.Add("Content-Length", strconv.Itoa(len(login.Encode())))
+
+	router.ServeHTTP(w2, req2)
+
+	responseStr := w2.Body.String()
+
+	log.Println(responseStr)
+	assert.Equal(t, w2.Code, 200)
+
+	// Get user info using auth token
+
+	var returnData map[string]*json.RawMessage
+
+	err = json.Unmarshal([]byte(responseStr), &returnData)
+	assert.Equal(t, err, nil)
+
+	var tokenStruct map[string]string
+
+	err = json.Unmarshal(*returnData["data"], &tokenStruct)
+	assert.Equal(t, err, nil)
+
+	token := tokenStruct["token"]
+
+	log.Println("token: " + token)
+
+	w3 := httptest.NewRecorder()
+
+	req3, _ := http.NewRequest("GET", "/v1/users", nil)
+	req3.Header.Add("Authorization", token)
+
+	router.ServeHTTP(w3, req3)
+
+	log.Println(w3.Body.String())
+	assert.Equal(t, w3.Code, 200)
+
+	// Invalid token
+
+	w4 := httptest.NewRecorder()
+
+	req4, _ := http.NewRequest("GET", "/v1/users", nil)
+	req4.Header.Add("Authorization", "InvalidToken")
+
+	router.ServeHTTP(w4, req4)
+
+	log.Println(w4.Body.String())
+	assert.Equal(t, w4.Code, 401)
 }

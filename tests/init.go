@@ -18,6 +18,7 @@ package tests
 
 import (
 	"flag"
+	"github.com/primasio/wormhole/cache"
 	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/models"
@@ -38,6 +39,12 @@ func InitTestEnv(configPath string) {
 	// Init Database
 	if err := db.Init(); err != nil {
 		log.Println("Database:", err)
+		os.Exit(1)
+	}
+
+	// Init Cache
+	if err := cache.InitCache(); err != nil {
+		log.Fatal(err)
 		os.Exit(1)
 	}
 

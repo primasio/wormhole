@@ -17,6 +17,7 @@
 package cache
 
 import (
+	"errors"
 	"github.com/gin-contrib/cache/persistence"
 	"github.com/primasio/wormhole/config"
 	"time"
@@ -24,21 +25,25 @@ import (
 
 var cacheStore persistence.CacheStore
 
-func InitCache() {
+func InitCache() error {
 	c := config.GetConfig()
 
 	cacheType := c.GetString("cache.type")
 
 	if cacheType == "memory" {
 		cacheStore = persistence.NewInMemoryStore(time.Second)
-	} else {
+	} else if cacheType == "redis" {
 
 		host := c.GetString("cache.host")
 		port := c.GetString("cache.port")
 		password := c.GetString("cache.password")
 
 		cacheStore = persistence.NewRedisCache(host+":"+port, password, time.Second)
+	} else {
+		return errors.New("unrecognized cache type")
 	}
+
+	return nil
 }
 
 func GetCache() persistence.CacheStore {

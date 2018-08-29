@@ -38,7 +38,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if err, userId := cache.SessionGet(reqToken); err != nil {
 
-			log.Fatal(err)
+			log.Println("token not exist", err)
 			c.AbortWithStatus(500)
 
 		} else {

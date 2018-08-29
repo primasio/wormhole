@@ -114,12 +114,12 @@ func (ctrl *UserController) Auth(c *gin.Context) {
 		dbi.First(&user)
 
 		if user.ID == 0 {
-			Error("User not found", c)
+			ErrorUnauthorized("User not found", c)
 			return
 		}
 
 		if !user.VerifyPassword(login.Password) {
-			Error("Incorrect password", c)
+			ErrorUnauthorized("Incorrect password", c)
 		} else {
 
 			// Login success, generate token

@@ -18,9 +18,12 @@ package cache
 
 import (
 	"errors"
+	"github.com/gin-contrib/cache/persistence"
 	"github.com/primasio/wormhole/util"
 	"time"
 )
+
+const sessionPrefix = "wormhole_session_"
 
 func NewSessionKey() (error, string) {
 
@@ -56,17 +59,23 @@ func SessionSet(token, userId string, expires bool) error {
 		duration = time.Hour * 2
 	}
 
-	return store.Set("wormhole_session_"+token, userId, duration)
+	return store.Set(sessionPrefix+token, userId, duration)
 }
 
 func SessionGet(token string) (err error, userId string) {
 
 	store := GetCache()
 
+	if store == nil {
+		return errors.New("cache store is nil"), ""
+	}
+
 	var userIdStore string
 
-	if err := store.Get("wormhole_session_"+token, &userIdStore); err != nil {
-		return err, ""
+	if err := store.Get(sessionPrefix+token, &userIdStore); err != nil {
+		if err != persistence.ErrCacheMiss && err != persistence.ErrNotStored {
+			return err, ""
+		}
 	}
 
 	return nil, userIdStore
