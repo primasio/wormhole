@@ -1,0 +1,15 @@
+---
+db:
+  type: sqlite3
+  connection: data/db.sqlite
+
+http:
+  server:
+    host: 127.0.0.1
+    port: 8080
+
+cache:
+  type: redis
+  host: 127.0.0.1
+  port: 5000
+  password: PrimasGoGoGo
