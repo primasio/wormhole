@@ -17,9 +17,10 @@
 package models
 
 import (
-	"encoding/hex"
+	"encoding/base64"
 	"github.com/primasio/wormhole/util"
 	"golang.org/x/crypto/sha3"
+	"math/big"
 	"time"
 )
 
@@ -29,6 +30,7 @@ type User struct {
 	Password string `form:"password" json:"password" binding:"required"`
 	Salt     string `binding:"-"`
 	Nickname string `form:"nickname" json:"nickname" binding:"required"`
+	Balance  string `binding:"-"`
 }
 
 func (user *User) VerifyPassword(password string) bool {
@@ -53,7 +55,7 @@ func (user *User) getPasswordHash(password string) string {
 	hash.Reset()
 	finalByte := hash.Sum(finalByteStr)
 
-	return hex.EncodeToString(finalByte)
+	return base64.StdEncoding.EncodeToString(finalByte)
 }
 
 func (user *User) setSalt() {
@@ -66,6 +68,17 @@ func (user *User) BeforeCreate() error {
 
 	user.setSalt()
 	user.hashPassword()
+	user.SetBalance(big.NewInt(0))
 
 	return nil
+}
+
+func (user *User) GetBalance() *big.Int {
+	balanceNum := big.NewInt(0)
+	balanceNum.SetString(user.Balance, 10)
+	return balanceNum
+}
+
+func (user *User) SetBalance(num *big.Int) {
+	user.Balance = num.String()
 }
