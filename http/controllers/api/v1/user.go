@@ -50,10 +50,10 @@ func (ctrl *UserController) Create(c *gin.Context) {
 		exist := &models.User{}
 		exist.Username = user.Username
 
-		dbi.First(&exist)
+		dbi.Where(&exist).First(&exist)
 
 		if exist.ID != 0 {
-			Error("Username exists", c)
+			Error("Username exists: username: "+exist.Username+", id: "+fmt.Sprintf("%d", exist.ID), c)
 			return
 		}
 

@@ -18,6 +18,7 @@ package v1_test
 
 import (
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"github.com/magiconair/properties/assert"
 	"github.com/primasio/wormhole/http/server"
 	"github.com/primasio/wormhole/tests"
@@ -25,14 +26,28 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
 )
 
-func TestUserController_Create(t *testing.T) {
+func TestMain(m *testing.M) {
+	before()
+	retCode := m.Run()
+	os.Exit(retCode)
+}
+
+var router *gin.Engine
+
+func before() {
+	log.Println("Setting up test environment")
 	tests.InitTestEnv("../../../../config/")
-	router := server.NewRouter()
+	router = server.NewRouter()
+}
+
+func TestUserController_Create(t *testing.T) {
+
 	w := httptest.NewRecorder()
 
 	// Test normal creation
@@ -73,8 +88,6 @@ func TestUserController_Create(t *testing.T) {
 
 func TestUserController_Auth(t *testing.T) {
 
-	tests.InitTestEnv("../../../../config/")
-	router := server.NewRouter()
 	w := httptest.NewRecorder()
 
 	// Test normal creation
@@ -90,6 +103,9 @@ func TestUserController_Auth(t *testing.T) {
 	data.Set("username", user.Username)
 	data.Set("password", user.Password)
 	data.Set("nickname", user.Nickname)
+
+	log.Println("Post data: ")
+	log.Println(data)
 
 	req, _ := http.NewRequest("POST", "/v1/users", strings.NewReader(data.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -139,8 +155,6 @@ func TestUserController_Auth(t *testing.T) {
 
 func TestUserController_Get(t *testing.T) {
 
-	tests.InitTestEnv("../../../../config/")
-	router := server.NewRouter()
 	w := httptest.NewRecorder()
 
 	// Create a user
@@ -156,6 +170,9 @@ func TestUserController_Get(t *testing.T) {
 	data.Set("username", user.Username)
 	data.Set("password", user.Password)
 	data.Set("nickname", user.Nickname)
+
+	log.Println("Post data: ")
+	log.Println(data)
 
 	req, _ := http.NewRequest("POST", "/v1/users", strings.NewReader(data.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
