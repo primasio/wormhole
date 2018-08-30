@@ -14,27 +14,32 @@
  * limitations under the License.
  */
 
-package v1
+package token
 
 import (
-	"github.com/gin-gonic/gin"
-	"log"
-	"net/http"
+	"fmt"
+	"github.com/primasio/wormhole/cache"
 )
 
-func Error(msg string, c *gin.Context) {
-	c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": msg})
+type Token struct {
+	Token string `json:"token"`
 }
 
-func Success(data interface{}, c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"success": true, "data": data})
-}
+/**
+ * Create new token for a given user
+ */
+func IssueToken(userId uint, expires bool) (*Token, error) {
 
-func ErrorServer(err error, c *gin.Context) {
-	log.Println(err)
-	c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Internal Server Error"})
-}
+	err, token := cache.NewSessionKey()
 
-func ErrorUnauthorized(msg string, c *gin.Context) {
-	c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": msg})
+	if err != nil {
+		return nil, err
+	}
+
+	userIdStr := fmt.Sprint(userId)
+	cache.SessionSet(token, userIdStr, expires)
+
+	tokenStruct := &Token{Token: token}
+
+	return tokenStruct, nil
 }

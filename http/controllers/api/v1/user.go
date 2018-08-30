@@ -17,13 +17,12 @@
 package v1
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/primasio/wormhole/cache"
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/http/middlewares"
+	"github.com/primasio/wormhole/http/oauth"
+	"github.com/primasio/wormhole/http/token"
 	"github.com/primasio/wormhole/models"
-	"log"
 )
 
 type UserController struct{}
@@ -123,21 +122,27 @@ func (ctrl *UserController) Auth(c *gin.Context) {
 		} else {
 
 			// Login success, generate token
-			err, token := cache.NewSessionKey()
+			accessToken, err := token.IssueToken(user.ID, login.Remember == "")
 
 			if err != nil {
-				log.Fatal(err)
-				c.AbortWithStatus(500)
-				return
+				ErrorServer(err, c)
 			}
 
-			userIdStr := fmt.Sprint(user.ID)
-			cache.SessionSet(token, userIdStr, login.Remember == "")
-
-			tokenStruct := make(map[string]string)
-			tokenStruct["token"] = token
-
-			Success(tokenStruct, c)
+			Success(accessToken, c)
 		}
 	}
+}
+
+func (ctrl *UserController) GoogleAuth(c *gin.Context) {
+
+	googleAuthToken := c.Param("token")
+
+	accessToken, err := oauth.HandleGoogleAuthToken(googleAuthToken)
+
+	if err != nil {
+		Error(err.Error(), c)
+		return
+	}
+
+	Success(accessToken, c)
 }
