@@ -14,39 +14,37 @@
  * limitations under the License.
  */
 
-package tests
+package v1
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/primasio/wormhole/db"
+	"github.com/primasio/wormhole/http/middlewares"
 	"github.com/primasio/wormhole/models"
-	"github.com/primasio/wormhole/util"
-	"log"
 )
 
-func CreateTestUser() (*models.User, error) {
+type ArticleController struct{}
 
-	u := &models.User{}
+func (ctrl *ArticleController) Publish(c *gin.Context) {
+	var article models.Article
 
-	randStr := util.RandString(5)
+	if err := c.ShouldBind(&article); err != nil {
+		Error(err.Error(), c)
+	} else {
+		dbi := db.GetDb()
 
-	u.Username = "test_user_" + randStr
-	u.Nickname = "Test User " + randStr
-	u.Password = "PrimasGoGoGo"
+		userId, _ := c.Get(middlewares.AuthorizedUserId)
 
-	log.Println("Created test user: " + u.Username)
+		article.UserId = userId.(uint)
 
-	return u, nil
+		dbi.Create(&article)
+
+		// TODO: Create async task to publish article to Primas
+
+		Success(article, c)
+	}
 }
 
-func CreateTestArticle(user *models.User) (*models.Article, error) {
+func (ctrl *ArticleController) Get(c *gin.Context) {
 
-	article := &models.Article{}
-
-	randStr := util.RandString(5)
-
-	article.UserId = user.ID
-
-	article.Title = "Test Article " + randStr
-	article.Content = "<p>This is a test article " + randStr + "</p>"
-
-	return article, nil
 }

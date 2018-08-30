@@ -18,6 +18,8 @@ package models
 
 import (
 	"encoding/base64"
+	"errors"
+	"github.com/jinzhu/gorm"
 	"github.com/primasio/wormhole/util"
 	"golang.org/x/crypto/sha3"
 	"math/big"
@@ -26,11 +28,12 @@ import (
 
 type User struct {
 	BaseModel
-	Username string `form:"username" json:"username" binding:"required"`
-	Password string `form:"password" json:"password" binding:"required"`
-	Salt     string `binding:"-"`
-	Nickname string `form:"nickname" json:"nickname" binding:"required"`
-	Balance  string `binding:"-"`
+	UniqueID string `json:"id" gorm:"unique_index"`
+	Username string `json:"-"`
+	Password string `json:"-"`
+	Salt     string `json:"-"`
+	Nickname string `json:"nickname"`
+	Balance  string `json:"balance"`
 }
 
 func (user *User) VerifyPassword(password string) bool {
@@ -81,4 +84,28 @@ func (user *User) GetBalance() *big.Int {
 
 func (user *User) SetBalance(num *big.Int) {
 	user.Balance = num.String()
+}
+
+func (user *User) SetUniqueID(db *gorm.DB) error {
+	var counter = 0
+
+	for {
+		counter = counter + 1
+		uid := util.RandStringUppercase(8)
+
+		check := &User{UniqueID: uid}
+
+		db.Where(&check).First(&check)
+
+		if check.ID == 0 {
+			user.UniqueID = uid
+			return nil
+		}
+
+		if counter >= 5 {
+			// This is unlikely to happen
+			// Must be error from other parts
+			return errors.New("too many iterations while generating new session key")
+		}
+	}
 }

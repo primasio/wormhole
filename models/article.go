@@ -16,20 +16,19 @@
 
 package models
 
-import "time"
+type Article struct {
+	BaseModel
 
-type BaseModel struct {
-	ID        uint `gorm:"primary_key" json:"-"`
-	CreatedAt uint `json:"-"`
-	UpdatedAt uint `json:"-"`
+	UserId   uint   `gorm:"index"`
+	Title    string `gorm:"type:text" form:"title" json:"title" binding:"required"`
+	Abstract string `gorm:"type:text"`
+	Content  string `gorm:"type:longtext" form:"content" json:"content" binding:"required"`
+	Language string `gorm:"column:lang;size:64" `
+
+	ContentId  string `gorm:"unique_index"`
+	ContentDNA string `gorm:"unique_index"`
 }
 
-func (model *BaseModel) BeforeCreate() error {
-	model.CreatedAt = uint(time.Now().Unix())
-	return nil
-}
-
-func (model *BaseModel) BeforeUpdate() error {
-	model.UpdatedAt = uint(time.Now().Unix())
-	return nil
+func (article *Article) DetectLanguage() string {
+	return ""
 }

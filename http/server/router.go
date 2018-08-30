@@ -43,6 +43,15 @@ func NewRouter() *gin.Engine {
 		{
 			userGroup.GET("", userCtrl.Get)
 		}
+
+		articleGroup := v1g.Group("articles")
+		articleCtrl := new(v1.ArticleController)
+
+		articleGroup.Use(middlewares.AuthMiddleware())
+		{
+			articleGroup.GET("/:article_id", articleCtrl.Get)
+			articleGroup.POST("", articleCtrl.Publish)
+		}
 	}
 
 	return router
