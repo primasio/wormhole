@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.com/primasio/wormhole.svg?branch=master)](https://travis-ci.com/primasio/wormhole)
 [![codecov](https://codecov.io/gh/primasio/wormhole/branch/master/graph/badge.svg)](https://codecov.io/gh/primasio/wormhole)
 [![GolangCI](https://golangci.com/badges/github.com/primasio/wormhole.svg)](https://golangci.com)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/primasio/wormhole)
 
 The wormhole, or Einstein–Rosen bridge, connects two different 3D locations from another dimension. It provides a way
 to travel through the space in no time.
