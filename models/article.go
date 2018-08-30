@@ -19,14 +19,14 @@ package models
 type Article struct {
 	BaseModel
 
-	UserId   uint   `gorm:"index"`
+	UserId   uint   `gorm:"index" json:"-"`
 	Title    string `gorm:"type:text" form:"title" json:"title" binding:"required"`
-	Abstract string `gorm:"type:text"`
+	Abstract string `gorm:"type:text" json:"abstract"`
 	Content  string `gorm:"type:longtext" form:"content" json:"content" binding:"required"`
-	Language string `gorm:"column:lang;size:64" `
+	Language string `gorm:"column:lang;size:64" json:"language"`
 
-	ContentId  string `gorm:"unique_index"`
-	ContentDNA string `gorm:"unique_index"`
+	ContentId  string `gorm:"unique_index" json:"content_id"`
+	ContentDNA string `gorm:"unique_index" json:"content_dna"`
 }
 
 func (article *Article) DetectLanguage() string {
