@@ -1,4 +1,8 @@
 ---
+application:
+  scheme: https
+  domain: api.wormhole.im
+
 db:
   type: sqlite3
   connection: data/db.sqlite

@@ -22,5 +22,6 @@ func AutoMigrateModels() {
 	dbi := db.GetDb()
 
 	dbi.AutoMigrate(&User{})
+	dbi.AutoMigrate(&UserOAuth{})
 	dbi.AutoMigrate(&Article{})
 }

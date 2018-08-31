@@ -33,26 +33,42 @@ func NewRouter() *gin.Engine {
 
 	v1g := router.Group("v1")
 	{
-		userGroup := v1g.Group("users")
-		userCtrl := new(v1.UserController)
+		// OAuth 2.0 endpoints
 
-		userGroup.POST("/oauth/google", userCtrl.GoogleAuth)
-		userGroup.POST("/oauth/callback/google", userCtrl.GoogleAuthCallback)
-		userGroup.POST("/auth", userCtrl.Auth)
-		userGroup.POST("", userCtrl.Create)
+		oauthCtrl := new(v1.OAuthController)
 
-		userGroup.Use(middlewares.AuthMiddleware())
+		oauthGroup := v1g.Group("oauth")
 		{
-			userGroup.GET("", userCtrl.Get)
+			oauthGroup.GET("google", oauthCtrl.GoogleAuth)
+			oauthGroup.POST("callback/google", oauthCtrl.GoogleAuthCallback)
 		}
 
-		articleGroup := v1g.Group("articles")
+		// User endpoints
+
+		userCtrl := new(v1.UserController)
+
+		userGroup := v1g.Group("users")
+		{
+			userGroup.POST("/auth", userCtrl.Auth)
+			userGroup.POST("", userCtrl.Create)
+
+			userGroup.Use(middlewares.AuthMiddleware())
+			{
+				userGroup.GET("", userCtrl.Get)
+			}
+		}
+
+		// Article endpoints
+
 		articleCtrl := new(v1.ArticleController)
 
-		articleGroup.Use(middlewares.AuthMiddleware())
+		articleGroup := v1g.Group("articles")
 		{
-			articleGroup.GET("/:article_id", articleCtrl.Get)
-			articleGroup.POST("", articleCtrl.Publish)
+			articleGroup.Use(middlewares.AuthMiddleware())
+			{
+				articleGroup.GET("/:article_id", articleCtrl.Get)
+				articleGroup.POST("", articleCtrl.Publish)
+			}
 		}
 	}
 

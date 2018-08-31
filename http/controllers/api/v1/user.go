@@ -20,10 +20,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/http/middlewares"
-	"github.com/primasio/wormhole/http/oauth"
 	"github.com/primasio/wormhole/http/token"
 	"github.com/primasio/wormhole/models"
-	"log"
 )
 
 type UserController struct{}
@@ -123,7 +121,7 @@ func (ctrl *UserController) Auth(c *gin.Context) {
 		} else {
 
 			// Login success, generate token
-			accessToken, err := token.IssueToken(user.ID, login.Remember == "")
+			err, accessToken := token.IssueToken(user.ID, login.Remember == "")
 
 			if err != nil {
 				ErrorServer(err, c)
@@ -132,23 +130,4 @@ func (ctrl *UserController) Auth(c *gin.Context) {
 			Success(accessToken, c)
 		}
 	}
-}
-
-func (ctrl *UserController) GoogleAuth(c *gin.Context) {
-
-	redirectUrl, err := oauth.HandleGoogleAuth()
-
-	if err != nil {
-		log.Println(err)
-		Error(err.Error(), c)
-	}
-
-	c.Redirect(301, redirectUrl)
-}
-
-func (ctrl *UserController) GoogleAuthCallback(c *gin.Context) {
-
-	token := c.Param("token")
-
-	oauth.HandleGoogleAuthCallback(token)
 }
