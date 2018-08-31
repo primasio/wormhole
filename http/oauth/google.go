@@ -16,6 +16,25 @@
 
 package oauth
 
-func HandleGoogleAuthToken(token string) (accessToken string, err error) {
-	return "", nil
+import (
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+)
+
+func HandleGoogleAuthCallback(token string) {
+
+}
+
+func HandleGoogleAuth() (redirectUrl string, err error) {
+
+	config := oauth2.Config{
+		ClientID:     "",
+		ClientSecret: "",
+		Endpoint:     google.Endpoint,
+		Scopes:       []string{},
+	}
+
+	url := config.AuthCodeURL("123")
+
+	return url, nil
 }

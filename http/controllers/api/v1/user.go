@@ -23,6 +23,7 @@ import (
 	"github.com/primasio/wormhole/http/oauth"
 	"github.com/primasio/wormhole/http/token"
 	"github.com/primasio/wormhole/models"
+	"log"
 )
 
 type UserController struct{}
@@ -135,14 +136,19 @@ func (ctrl *UserController) Auth(c *gin.Context) {
 
 func (ctrl *UserController) GoogleAuth(c *gin.Context) {
 
-	googleAuthToken := c.Param("token")
-
-	accessToken, err := oauth.HandleGoogleAuthToken(googleAuthToken)
+	redirectUrl, err := oauth.HandleGoogleAuth()
 
 	if err != nil {
+		log.Println(err)
 		Error(err.Error(), c)
-		return
 	}
 
-	Success(accessToken, c)
+	c.Redirect(301, redirectUrl)
+}
+
+func (ctrl *UserController) GoogleAuthCallback(c *gin.Context) {
+
+	token := c.Param("token")
+
+	oauth.HandleGoogleAuthCallback(token)
 }

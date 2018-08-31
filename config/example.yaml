@@ -13,3 +13,8 @@ cache:
   host: 127.0.0.1
   port: 5000
   password: PrimasGoGoGo
+
+oauth:
+  google:
+    client_id:
+    client_secret:

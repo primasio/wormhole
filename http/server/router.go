@@ -36,7 +36,8 @@ func NewRouter() *gin.Engine {
 		userGroup := v1g.Group("users")
 		userCtrl := new(v1.UserController)
 
-		userGroup.POST("/auth/google/:token", userCtrl.GoogleAuth)
+		userGroup.POST("/oauth/google", userCtrl.GoogleAuth)
+		userGroup.POST("/oauth/callback/google", userCtrl.GoogleAuthCallback)
 		userGroup.POST("/auth", userCtrl.Auth)
 		userGroup.POST("", userCtrl.Create)
 
