@@ -23,6 +23,7 @@ import (
 	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/http/server"
+	"github.com/primasio/wormhole/models"
 	"log"
 	"os"
 )
@@ -49,6 +50,10 @@ func main() {
 	// Init Cache
 	if err := cache.InitCache(); err != nil {
 		log.Fatal(err)
+	}
+
+	if *environment == "dev" {
+		models.AutoMigrateModels()
 	}
 
 	// Start HTTP server

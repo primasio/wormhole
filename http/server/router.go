@@ -40,7 +40,7 @@ func NewRouter() *gin.Engine {
 		oauthGroup := v1g.Group("oauth")
 		{
 			oauthGroup.GET("google", oauthCtrl.GoogleAuth)
-			oauthGroup.POST("callback/google", oauthCtrl.GoogleAuthCallback)
+			oauthGroup.GET("callback/google", oauthCtrl.GoogleAuthCallback)
 		}
 
 		// User endpoints

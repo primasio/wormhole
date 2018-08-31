@@ -31,11 +31,18 @@ type OAuthController struct{}
 
 func (ctrl *OAuthController) GoogleAuth(c *gin.Context) {
 
-	redirectURI := c.Param("redirect_uri")
+	redirectURI := c.Query("redirect_uri")
+
+	if redirectURI == "" {
+		Error("missing query param redirect_uri", c)
+		return
+	}
 
 	// State is used to prevent attack
 	// also as a session key to remember the source of request
 	state := util.RandString(8)
+
+	log.Println("generated state: " + state)
 
 	if err := cache.GetCache().Set("oauth_state_"+state, redirectURI, time.Hour*2); err != nil {
 		ErrorServer(err, c)
@@ -48,13 +55,15 @@ func (ctrl *OAuthController) GoogleAuth(c *gin.Context) {
 
 func (ctrl *OAuthController) GoogleAuthCallback(c *gin.Context) {
 
-	code := c.Param("code")
-	state := c.Param("state")
-	googleError := c.Param("error")
+	code := c.Query("code")
+	state := c.Query("state")
+	googleError := c.Query("error")
 
 	var redirectUri string
 
 	// Check state
+
+	log.Println("retrieve state: " + state)
 
 	if err := cache.GetCache().Get("oauth_state_"+state, &redirectUri); err != nil {
 		ErrorServer(err, c)
