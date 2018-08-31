@@ -8,7 +8,8 @@
 The wormhole, or Einstein–Rosen bridge, connects two different 3D locations from another dimension. It provides a way
 to travel through the space in no time.
 
-The Wormhole project, connects the Internet to the Blockchain, or more precisely, the Primas decentralized network.
+The Wormhole project, connects the Internet to the Blockchain, or more precisely, the
+[Primas Decentralized Network](https://primas.io).
 
 Wormhole is the common part of all the traditional applications that integrate with Primas. It is a showcase of how Primas
 API can be used to implement various of use cases. It can be used as the boilerplate for new applications that want to
