@@ -42,8 +42,6 @@ func (ctrl *OAuthController) GoogleAuth(c *gin.Context) {
 	// also as a session key to remember the source of request
 	state := util.RandString(8)
 
-	log.Println("generated state: " + state)
-
 	if err := cache.GetCache().Set("oauth_state_"+state, redirectURI, time.Hour*2); err != nil {
 		ErrorServer(err, c)
 		return
@@ -62,8 +60,6 @@ func (ctrl *OAuthController) GoogleAuthCallback(c *gin.Context) {
 	var redirectUri string
 
 	// Check state
-
-	log.Println("retrieve state: " + state)
 
 	if err := cache.GetCache().Get("oauth_state_"+state, &redirectUri); err != nil {
 		ErrorServer(err, c)
