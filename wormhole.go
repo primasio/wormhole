@@ -17,8 +17,6 @@
 package main
 
 import (
-	"flag"
-	"fmt"
 	"github.com/primasio/wormhole/cache"
 	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
@@ -31,16 +29,14 @@ import (
 func main() {
 
 	// Init Environment
-	environment := flag.String("e", "dev", "")
-	flag.Usage = func() {
-		fmt.Println("Usage: wormhole -e {mode}")
-		os.Exit(1)
+	env := os.Getenv("APP_ENV")
+
+	if env == "" {
+		env = "development"
 	}
 
-	flag.Parse()
-
 	// Init Config
-	config.Init(*environment, nil)
+	config.Init(env, nil)
 
 	// Init Database
 	if err := db.Init(); err != nil {
@@ -52,7 +48,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if *environment == "dev" {
+	if env == "development" {
 		models.AutoMigrateModels()
 	}
 
