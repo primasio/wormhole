@@ -15,22 +15,28 @@ Wormhole is the common part of all the traditional applications that integrate w
 API can be used to implement various of use cases. It can be used as the boilerplate for new applications that want to
 connect to Primas.
 
-### Integration with Primas SDK
+### Centralized Account System
 
-Wormhole is a centralized platform built upon Primas, connecting to [Primas API](https://github.com/primasio/primas-api-doc)
-using [Primas Go SDK](https://github.com/primasio/primas-api-sdk-go), which encapsulates the cryptographic account to the
+Wormhole is a centralized platform built upon Primas, which encapsulates the cryptographic account to the
 outside world and provides a user-friendly traditional account system. Users could sign up using username and password.
 They can even sign up with Twitter or Facebook account.
+
+### Integration with Primas SDK
+
+Wormhole connects to [Primas API](https://github.com/primasio/primas-api-doc)
+using [Primas Go SDK](https://github.com/primasio/primas-api-sdk-go). It provides the same collection of APIs that
+Primas offers in an access token based authentication model where access token is granted by providing the username and
+password, and access token can be used to authenticate upcoming API requests. As a working example, Wormhole hosted by
+Primas development team is used by Primas browser extension and several other side projects.
 
 Wormhole implements offline signing mechanism to protect its own private key. Other than that, no signature is needed in
 any cases for Wormhole users or applications connecting to Wormhole.
 
-### Centralized Account System
+The womrhole instance hosted by Primas development team is accessible at:
 
-Wormhole provides the same collection of APIs that Primas offers in an access token based authentication model where
-access token is granted by providing the username and password, and access token can be used to authenticate upcoming
-API requests. As a working example, Wormhole hosted by Primas development team is used by Primas browser extension and
-several other side projects.
+[https://api.wormhole.im](https://api.wormhole.im)
+
+Check the [github wiki page](https://github.com/primasio/wormhole/wiki) for API documentation.
 
 ### Independent Economic Incentives Model
 
