@@ -50,6 +50,8 @@ func PrepareURLContent() (error, *models.URLContent) {
 		UserId:   systemUser.ID,
 	}
 
+	urlContent.HashKey = models.GetURLHashKey(urlContent.URL)
+
 	dbi := db.GetDb()
 	dbi.Create(&urlContent)
 
