@@ -46,7 +46,11 @@ func PrepareURLContentComment(content *models.URLContent) (error, *models.URLCon
 		URLContentId: content.ID,
 	}
 
-	urlContentComment.SetUniqueID(dbi)
+	err := urlContentComment.SetUniqueID(dbi)
+
+	if err != nil {
+		return err, nil
+	}
 
 	dbi.Create(&urlContentComment)
 
