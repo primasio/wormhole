@@ -25,16 +25,21 @@ import (
 )
 
 var instance *gorm.DB
+var instanceType string
 
 func GetDb() *gorm.DB {
 	return instance
+}
+
+func GetDbType() string {
+	return instanceType
 }
 
 func Init() error {
 
 	c := config.GetConfig()
 
-	dbType := c.GetString("db.type")
+	instanceType = c.GetString("db.type")
 	dbConn := c.GetString("db.connection")
 
 	if dbConn == "" {
@@ -49,7 +54,7 @@ func Init() error {
 
 	var err error
 
-	instance, err = gorm.Open(dbType, dbConn)
+	instance, err = gorm.Open(instanceType, dbConn)
 
 	if err != nil {
 		return err

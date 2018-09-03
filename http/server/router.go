@@ -83,7 +83,7 @@ func NewRouter() *gin.Engine {
 			urlContentGroup.Use(middlewares.AuthMiddleware())
 			{
 				urlContentGroup.POST("", urlContentCtrl.Create)
-				urlContentGroup.PUT("/:url", urlContentCtrl.Vote)
+				urlContentGroup.PUT("/url", urlContentCtrl.Vote)
 			}
 		}
 	}

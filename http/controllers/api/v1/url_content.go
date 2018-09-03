@@ -77,9 +77,99 @@ func (ctrl *URLContentController) Get(c *gin.Context) {
 
 	url := c.Query("url")
 
-	if url == "" {
-		ErrorNotFound(errors.New("url not found"), c)
+	err, urlContent := findURL(url)
+
+	if err != nil {
+		ErrorNotFound(err, c)
 		return
+	}
+
+	Success(urlContent, c)
+}
+
+func (ctrl *URLContentController) Vote(c *gin.Context) {
+
+	url := c.Query("url")
+
+	err, urlContent := findURL(url)
+
+	if err != nil {
+		ErrorNotFound(err, c)
+		return
+	}
+
+	if urlContent.IsActive == true {
+		Error("url is already active", c)
+		return
+	}
+
+	// Update vote should be executed on a locked object
+
+	lockedURLContent := &models.URLContent{}
+
+	tx := db.GetDb().Begin()
+
+	// If SQLite is used, FOR UPDATE is not supported
+	// Then there is an error of concurrent votes count
+
+	sql := "SELECT * FROM url_contents WHERE id = ?"
+
+	if db.GetDbType() != "sqlite3" {
+		sql = sql + " FOR UPDATE"
+	}
+
+	if err := tx.Raw(sql, urlContent.ID).Scan(&lockedURLContent).Error; err != nil {
+		tx.Rollback()
+		ErrorServer(err, c)
+		return
+	}
+
+	if lockedURLContent.ID == 0 {
+		tx.Rollback()
+		ErrorServer(errors.New("error lock url_content"), c)
+		return
+	}
+
+	// Check user vote status
+	// this should be performed after the locking of url_content
+	// to avoid race condition of concurrent voting from the same user
+
+	userId, _ := c.Get(middlewares.AuthorizedUserId)
+
+	vote := &models.URLContentVote{
+		UserId:       userId.(uint),
+		URLContentID: lockedURLContent.ID,
+	}
+
+	tx.Where(&vote).First(&vote)
+
+	if vote.ID != 0 {
+		tx.Rollback()
+		Error("user already voted", c)
+		return
+	}
+
+	lockedURLContent.Votes++
+
+	if err := tx.Save(&lockedURLContent).Error; err != nil {
+		tx.Rollback()
+		ErrorServer(err, c)
+		return
+	}
+
+	if err := tx.Create(vote).Error; err != nil {
+		tx.Rollback()
+		ErrorServer(err, c)
+		return
+	}
+
+	tx.Commit()
+	Success(lockedURLContent, c)
+}
+
+func findURL(url string) (error, *models.URLContent) {
+	if url == "" {
+		return errors.New("url is empty"), nil
 	}
 
 	urlContent := &models.URLContent{}
@@ -90,13 +180,8 @@ func (ctrl *URLContentController) Get(c *gin.Context) {
 	dbi.Where(&urlContent).First(&urlContent)
 
 	if urlContent.ID == 0 {
-		ErrorNotFound(errors.New("url not found"), c)
-		return
+		return errors.New("url not found"), nil
 	}
 
-	Success(urlContent, c)
-}
-
-func (ctrl *URLContentController) Vote(c *gin.Context) {
-
+	return nil, urlContent
 }

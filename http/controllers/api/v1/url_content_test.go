@@ -102,3 +102,49 @@ func TestURLContentController_Get(t *testing.T) {
 	log.Println(w.Body.String())
 	assert.Equal(t, w.Code, 200)
 }
+
+func TestURLContentController_Vote(t *testing.T) {
+	PrepareAuthToken(t)
+	err, urlContent := PrepareURLContent()
+
+	assert.Equal(t, err, nil)
+
+	escaped := url.QueryEscape(urlContent.URL)
+
+	log.Println("escaped url: " + escaped)
+
+	req, _ := http.NewRequest("PUT", "/v1/urls/url?url="+escaped, nil)
+	req.Header.Add("Authorization", authToken)
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	log.Println(w.Body.String())
+	assert.Equal(t, w.Code, 200)
+
+	// Vote again
+	w2 := httptest.NewRecorder()
+
+	req2, _ := http.NewRequest("PUT", "/v1/urls/url?url="+escaped, nil)
+	req2.Header.Add("Authorization", authToken)
+
+	router.ServeHTTP(w2, req2)
+
+	log.Println(w2.Body.String())
+	assert.Equal(t, w2.Code, 400)
+
+	// Test URL that is already active
+
+	urlContent.IsActive = true
+	dbi := db.GetDb()
+	dbi.Save(&urlContent)
+
+	req3, _ := http.NewRequest("PUT", "/v1/urls/url?url="+escaped, nil)
+	req3.Header.Add("Authorization", authToken)
+
+	w3 := httptest.NewRecorder()
+	router.ServeHTTP(w3, req3)
+
+	log.Println(w3.Body.String())
+	assert.Equal(t, w3.Code, 400)
+}

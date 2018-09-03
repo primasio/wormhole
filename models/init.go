@@ -25,4 +25,5 @@ func AutoMigrateModels() {
 	dbi.AutoMigrate(&UserOAuth{})
 	dbi.AutoMigrate(&Article{})
 	dbi.AutoMigrate(&URLContent{})
+	dbi.AutoMigrate(&URLContentVote{})
 }
