@@ -62,6 +62,7 @@ func (ctrl *URLContentController) Create(c *gin.Context) {
 		urlContent.Title = form.Title
 		urlContent.Content = form.Content
 		urlContent.Abstract = form.Abstract
+		urlContent.IsActive = true
 
 		userId, _ := c.Get(middlewares.AuthorizedUserId)
 		urlContent.UserId = userId.(uint)
