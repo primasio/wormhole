@@ -38,3 +38,7 @@ func ErrorServer(err error, c *gin.Context) {
 func ErrorUnauthorized(msg string, c *gin.Context) {
 	c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": msg})
 }
+
+func ErrorNotFound(err error, c *gin.Context) {
+	c.JSON(http.StatusNotFound, gin.H{"success": false, "message": err.Error()})
+}

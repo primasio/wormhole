@@ -16,13 +16,14 @@
 
 package models
 
-import "github.com/primasio/wormhole/db"
+type URLContent struct {
+	BaseModel
+	UserId   uint   `json:"-"`
+	URL      string `gorm:"unique_index"`
+	Abstract string `gorm:"type:text"`
+	Content  string `gorm:"type:longtext"`
 
-func AutoMigrateModels() {
-	dbi := db.GetDb()
-
-	dbi.AutoMigrate(&User{})
-	dbi.AutoMigrate(&UserOAuth{})
-	dbi.AutoMigrate(&Article{})
-	dbi.AutoMigrate(&URLContent{})
+	IsActive     bool `gorm:"default:false" json:"is_active"`
+	Votes        uint `gorm:"default:1" json:"votes"`
+	TotalComment uint `gorm:"default:0" json:"total_comment"`
 }

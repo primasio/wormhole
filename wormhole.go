@@ -36,7 +36,14 @@ func main() {
 	}
 
 	// Init Config
-	config.Init(env, nil)
+
+	configDir := os.Getenv("CONFIG")
+
+	if configDir != "" {
+		config.Init(env, &configDir)
+	} else {
+		config.Init(env, nil)
+	}
 
 	// Init Database
 	if err := db.Init(); err != nil {

@@ -70,6 +70,22 @@ func NewRouter() *gin.Engine {
 				articleGroup.POST("", articleCtrl.Publish)
 			}
 		}
+
+		// URL Content endpoints
+
+		urlContentCtrl := new(v1.URLContentController)
+
+		urlContentGroup := v1g.Group("urls")
+		{
+			urlContentGroup.GET("/url", urlContentCtrl.Get)
+			urlContentGroup.GET("", urlContentCtrl.List)
+
+			urlContentGroup.Use(middlewares.AuthMiddleware())
+			{
+				urlContentGroup.POST("", urlContentCtrl.Create)
+				urlContentGroup.PUT("/:url", urlContentCtrl.Vote)
+			}
+		}
 	}
 
 	return router
