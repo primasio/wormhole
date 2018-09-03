@@ -17,10 +17,14 @@
 package v1_test
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/magiconair/properties/assert"
 	"github.com/primasio/wormhole/db"
+	"github.com/primasio/wormhole/http/token"
 	"github.com/primasio/wormhole/models"
+	"github.com/primasio/wormhole/tests"
+	"github.com/primasio/wormhole/util"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -36,8 +40,10 @@ func PrepareURLContent() (error, *models.URLContent) {
 		return errors.New("system user not created"), nil
 	}
 
+	randStr := util.RandString(10)
+
 	urlContent := &models.URLContent{
-		URL:      "https://cn.primas.io/12345",
+		URL:      "https://cn.primas.io/12345" + randStr,
 		Title:    "Title of the Content",
 		Content:  "<p>The content of the url.</p>",
 		Abstract: "The content of the url.",
@@ -113,6 +119,8 @@ func TestURLContentController_Vote(t *testing.T) {
 
 	log.Println("escaped url: " + escaped)
 
+	// Author cannot vote
+
 	req, _ := http.NewRequest("PUT", "/v1/urls/url?url="+escaped, nil)
 	req.Header.Add("Authorization", authToken)
 
@@ -120,31 +128,133 @@ func TestURLContentController_Vote(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	log.Println(w.Body.String())
-	assert.Equal(t, w.Code, 200)
+	assert.Equal(t, w.Code, 400)
 
-	// Vote again
-	w2 := httptest.NewRecorder()
+	dbi := db.GetDb()
+
+	// Vote using another user
+	user, err := tests.CreateTestUser()
+	assert.Equal(t, err, nil)
+
+	user.SetUniqueID(dbi)
+	dbi.Create(&user)
+
+	err, userToken := token.IssueToken(user.ID, false)
+	assert.Equal(t, err, nil)
 
 	req2, _ := http.NewRequest("PUT", "/v1/urls/url?url="+escaped, nil)
-	req2.Header.Add("Authorization", authToken)
+	req2.Header.Add("Authorization", userToken.Token)
 
+	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req2)
 
 	log.Println(w2.Body.String())
-	assert.Equal(t, w2.Code, 400)
+	assert.Equal(t, w2.Code, 200)
 
-	// Test URL that is already active
-
-	urlContent.IsActive = true
-	dbi := db.GetDb()
-	dbi.Save(&urlContent)
+	// Vote again
+	w3 := httptest.NewRecorder()
 
 	req3, _ := http.NewRequest("PUT", "/v1/urls/url?url="+escaped, nil)
-	req3.Header.Add("Authorization", authToken)
+	req3.Header.Add("Authorization", userToken.Token)
 
-	w3 := httptest.NewRecorder()
 	router.ServeHTTP(w3, req3)
 
 	log.Println(w3.Body.String())
 	assert.Equal(t, w3.Code, 400)
+
+	// Test URL that is already active
+
+	urlContent.IsActive = true
+
+	dbi.Save(&urlContent)
+
+	req4, _ := http.NewRequest("PUT", "/v1/urls/url?url="+escaped, nil)
+	req4.Header.Add("Authorization", authToken)
+
+	w4 := httptest.NewRecorder()
+	router.ServeHTTP(w4, req4)
+
+	log.Println(w4.Body.String())
+	assert.Equal(t, w4.Code, 400)
+}
+
+func TestURLContentController_List(t *testing.T) {
+	PrepareSystemUser()
+
+	// Create a list of url content
+
+	urlContents := make([]*models.URLContent, 10)
+
+	dbi := db.GetDb()
+
+	largestActiveCreatedAt := uint(0)
+	largestVotingCreatedAt := uint(0)
+
+	for i := 0; i < 10; i++ {
+		err, urlContent := PrepareURLContent()
+		assert.Equal(t, err, nil)
+
+		if i%2 == 0 {
+			urlContent.IsActive = true
+			largestActiveCreatedAt++
+			urlContent.CreatedAt = largestActiveCreatedAt
+		} else {
+			largestVotingCreatedAt++
+			urlContent.CreatedAt = largestVotingCreatedAt
+		}
+
+		dbi.Save(&urlContent)
+		urlContents[i] = urlContent
+	}
+
+	// Get voting list
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest("GET", "/v1/urls?type=voting", nil)
+
+	router.ServeHTTP(w, req)
+
+	resp := w.Body.String()
+
+	log.Println(resp)
+	assert.Equal(t, w.Code, 200)
+
+	// Check result
+	urlContentList := getUrlContentListFromJsonString(resp, t)
+	assert.Equal(t, len(urlContentList), 5)
+	assert.Equal(t, urlContentList[0].CreatedAt, largestVotingCreatedAt)
+	assert.Equal(t, urlContentList[0].IsActive, false)
+
+	// Get active list
+	w2 := httptest.NewRecorder()
+
+	req2, _ := http.NewRequest("GET", "/v1/urls?type=active", nil)
+
+	router.ServeHTTP(w2, req2)
+
+	resp2 := w2.Body.String()
+
+	log.Println(resp2)
+	assert.Equal(t, w2.Code, 200)
+
+	// Check result
+	urlContentList2 := getUrlContentListFromJsonString(resp2, t)
+	assert.Equal(t, len(urlContentList2), 5)
+	assert.Equal(t, urlContentList2[0].CreatedAt, largestActiveCreatedAt)
+	assert.Equal(t, urlContentList2[0].IsActive, true)
+}
+
+func getUrlContentListFromJsonString(jsonStr string, t *testing.T) []models.URLContent {
+
+	var returnData map[string]*json.RawMessage
+
+	err := json.Unmarshal([]byte(jsonStr), &returnData)
+	assert.Equal(t, err, nil)
+
+	var list []models.URLContent
+
+	err = json.Unmarshal(*returnData["data"], &list)
+	assert.Equal(t, err, nil)
+
+	return list
 }

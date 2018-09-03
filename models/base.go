@@ -20,8 +20,8 @@ import "time"
 
 type BaseModel struct {
 	ID        uint `gorm:"primary_key" json:"-"`
-	CreatedAt uint `json:"-"`
-	UpdatedAt uint `json:"-"`
+	CreatedAt uint `json:"created_at"`
+	UpdatedAt uint `json:"updated_at"`
 }
 
 func (model *BaseModel) BeforeCreate() error {

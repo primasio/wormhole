@@ -22,6 +22,7 @@ import (
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/http/middlewares"
 	"github.com/primasio/wormhole/models"
+	"strconv"
 )
 
 type URLContentController struct{}
@@ -71,6 +72,30 @@ func (ctrl *URLContentController) Create(c *gin.Context) {
 
 func (ctrl *URLContentController) List(c *gin.Context) {
 
+	urlType := c.Query("type")
+
+	pageSize := 20
+	page, err := strconv.Atoi(c.Query("page"))
+
+	if err != nil {
+		page = 0
+	}
+
+	offsetNum := page * pageSize
+
+	var urlList []models.URLContent
+
+	dbi := db.GetDb()
+	query := dbi.Select("id, url, title, abstract, votes, is_active, total_comment, created_at, updated_at")
+	query = query.Where("is_active = ?", urlType != "voting")
+	query = query.Order("created_at DESC").Offset(offsetNum).Limit(pageSize)
+
+	if err := query.Find(&urlList).Error; err != nil {
+		ErrorServer(err, c)
+		return
+	}
+
+	Success(urlList, c)
 }
 
 func (ctrl *URLContentController) Get(c *gin.Context) {
@@ -100,6 +125,14 @@ func (ctrl *URLContentController) Vote(c *gin.Context) {
 
 	if urlContent.IsActive == true {
 		Error("url is already active", c)
+		return
+	}
+
+	userId, _ := c.Get(middlewares.AuthorizedUserId)
+	userIdNum := userId.(uint)
+
+	if urlContent.UserId == userId {
+		Error("user already voted", c)
 		return
 	}
 
@@ -134,10 +167,8 @@ func (ctrl *URLContentController) Vote(c *gin.Context) {
 	// this should be performed after the locking of url_content
 	// to avoid race condition of concurrent voting from the same user
 
-	userId, _ := c.Get(middlewares.AuthorizedUserId)
-
 	vote := &models.URLContentVote{
-		UserId:       userId.(uint),
+		UserId:       userIdNum,
 		URLContentID: lockedURLContent.ID,
 	}
 
