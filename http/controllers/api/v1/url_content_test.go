@@ -136,7 +136,8 @@ func TestURLContentController_Vote(t *testing.T) {
 	user, err := tests.CreateTestUser()
 	assert.Equal(t, err, nil)
 
-	user.SetUniqueID(dbi)
+	err = user.SetUniqueID(dbi)
+	assert.Equal(t, err, nil)
 	dbi.Create(&user)
 
 	err, userToken := token.IssueToken(user.ID, false)

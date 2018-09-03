@@ -57,7 +57,9 @@ func PrepareSystemUser() {
 
 	dbi := db.GetDb()
 
-	user.SetUniqueID(dbi)
+	if err := user.SetUniqueID(dbi); err != nil {
+		log.Fatal(err)
+	}
 
 	dbi.Create(&user)
 

@@ -123,7 +123,7 @@ func (ctrl *URLContentController) Vote(c *gin.Context) {
 		return
 	}
 
-	if urlContent.IsActive == true {
+	if urlContent.IsActive {
 		Error("url is already active", c)
 		return
 	}
