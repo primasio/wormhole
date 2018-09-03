@@ -107,6 +107,11 @@ func (ctrl *URLContentCommentController) List(c *gin.Context) {
 
 	url := c.Query("url")
 
+	if url == "" {
+		Error("missing query param url", c)
+		return
+	}
+
 	dbi := db.GetDb()
 	if err, urlContent := models.GetURLContentByURL(url, dbi, false); err != nil {
 		ErrorServer(err, c)
