@@ -17,34 +17,16 @@
 package v1_test
 
 import (
-	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"github.com/magiconair/properties/assert"
-	"github.com/primasio/wormhole/http/server"
 	"github.com/primasio/wormhole/tests"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 	"testing"
 )
-
-func TestMain(m *testing.M) {
-	before()
-	retCode := m.Run()
-	os.Exit(retCode)
-}
-
-var router *gin.Engine
-
-func before() {
-	log.Println("Setting up test environment")
-	tests.InitTestEnv("../../../../config/")
-	router = server.NewRouter()
-}
 
 func TestUserController_Create(t *testing.T) {
 
@@ -88,41 +70,15 @@ func TestUserController_Create(t *testing.T) {
 
 func TestUserController_Auth(t *testing.T) {
 
-	w := httptest.NewRecorder()
-
-	// Test normal creation
-
-	user, err := tests.CreateTestUser()
-
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	data := url.Values{}
-	data.Set("username", user.Username)
-	data.Set("password", user.Password)
-	data.Set("nickname", user.Nickname)
-
-	log.Println("Post data: ")
-	log.Println(data)
-
-	req, _ := http.NewRequest("POST", "/v1/users", strings.NewReader(data.Encode()))
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-
-	router.ServeHTTP(w, req)
-
-	log.Println(w.Body.String())
-	assert.Equal(t, w.Code, 200)
+	PrepareSystemUser()
 
 	// Login using this user
 
 	w2 := httptest.NewRecorder()
 
 	login := url.Values{}
-	login.Set("username", user.Username)
-	login.Set("password", user.Password)
+	login.Set("username", systemUser.Username)
+	login.Set("password", "PrimasGoGoGo")
 	login.Set("remember", "on")
 
 	req2, _ := http.NewRequest("POST", "/v1/users/auth", strings.NewReader(login.Encode()))
@@ -139,7 +95,7 @@ func TestUserController_Auth(t *testing.T) {
 	w3 := httptest.NewRecorder()
 
 	login2 := url.Values{}
-	login2.Set("username", user.Username)
+	login2.Set("username", systemUser.Username)
 	login2.Set("password", "wrong_password")
 	login2.Set("remember", "on")
 
@@ -155,74 +111,14 @@ func TestUserController_Auth(t *testing.T) {
 
 func TestUserController_Get(t *testing.T) {
 
-	w := httptest.NewRecorder()
-
-	// Create a user
-
-	user, err := tests.CreateTestUser()
-
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	data := url.Values{}
-	data.Set("username", user.Username)
-	data.Set("password", user.Password)
-	data.Set("nickname", user.Nickname)
-
-	log.Println("Post data: ")
-	log.Println(data)
-
-	req, _ := http.NewRequest("POST", "/v1/users", strings.NewReader(data.Encode()))
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-
-	router.ServeHTTP(w, req)
-
-	log.Println(w.Body.String())
-	assert.Equal(t, w.Code, 200)
-
-	// Login using this user
-
-	w2 := httptest.NewRecorder()
-
-	login := url.Values{}
-	login.Set("username", user.Username)
-	login.Set("password", user.Password)
-	login.Set("remember", "on")
-
-	req2, _ := http.NewRequest("POST", "/v1/users/auth", strings.NewReader(login.Encode()))
-	req2.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req2.Header.Add("Content-Length", strconv.Itoa(len(login.Encode())))
-
-	router.ServeHTTP(w2, req2)
-
-	responseStr := w2.Body.String()
-
-	log.Println(responseStr)
-	assert.Equal(t, w2.Code, 200)
+	PrepareAuthToken(t)
 
 	// Get user info using auth token
-
-	var returnData map[string]*json.RawMessage
-
-	err = json.Unmarshal([]byte(responseStr), &returnData)
-	assert.Equal(t, err, nil)
-
-	var tokenStruct map[string]string
-
-	err = json.Unmarshal(*returnData["data"], &tokenStruct)
-	assert.Equal(t, err, nil)
-
-	token := tokenStruct["token"]
-
-	log.Println("token: " + token)
 
 	w3 := httptest.NewRecorder()
 
 	req3, _ := http.NewRequest("GET", "/v1/users", nil)
-	req3.Header.Add("Authorization", token)
+	req3.Header.Add("Authorization", authToken)
 
 	router.ServeHTTP(w3, req3)
 

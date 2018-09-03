@@ -14,44 +14,32 @@
  * limitations under the License.
  */
 
-package main
+package token
 
 import (
+	"fmt"
 	"github.com/primasio/wormhole/cache"
-	"github.com/primasio/wormhole/config"
-	"github.com/primasio/wormhole/db"
-	"github.com/primasio/wormhole/http/server"
-	"github.com/primasio/wormhole/models"
-	"log"
-	"os"
 )
 
-func main() {
+type Token struct {
+	Token string `json:"token"`
+}
 
-	// Init Environment
-	env := os.Getenv("APP_ENV")
+/**
+ * Create new token for a given user
+ */
+func IssueToken(userId uint, expires bool) (error, *Token) {
 
-	if env == "" {
-		env = "development"
+	err, token := cache.NewSessionKey()
+
+	if err != nil {
+		return err, nil
 	}
 
-	// Init Config
-	config.Init(env, nil)
+	userIdStr := fmt.Sprint(userId)
+	cache.SessionSet(token, userIdStr, expires)
 
-	// Init Database
-	if err := db.Init(); err != nil {
-		log.Fatal(err)
-	}
+	tokenStruct := &Token{Token: token}
 
-	// Init Cache
-	if err := cache.InitCache(); err != nil {
-		log.Fatal(err)
-	}
-
-	if env == "development" {
-		models.AutoMigrateModels()
-	}
-
-	// Start HTTP server
-	server.Init()
+	return nil, tokenStruct
 }

@@ -17,14 +17,11 @@
 package v1
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/primasio/wormhole/cache"
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/http/middlewares"
+	"github.com/primasio/wormhole/http/token"
 	"github.com/primasio/wormhole/models"
-	"log"
-	"strconv"
 )
 
 type UserController struct{}
@@ -35,29 +32,43 @@ type LoginForm struct {
 	Remember string `form:"remember" json:"remember"`
 }
 
+type RegisterForm struct {
+	Username string `form:"username" json:"username" binding:"required"`
+	Password string `form:"password" json:"password" binding:"required"`
+	Nickname string `form:"nickname" json:"nickname" binding:"required"`
+}
+
 func (ctrl *UserController) Create(c *gin.Context) {
 
-	var user models.User
+	var form RegisterForm
 
-	if err := c.ShouldBind(&user); err != nil {
+	if err := c.ShouldBind(&form); err != nil {
 		Error(err.Error(), c)
 	} else {
-
 		dbi := db.GetDb()
 
 		// Check username uniqueness
 
 		exist := &models.User{}
-		exist.Username = user.Username
+		exist.Username = form.Username
 
 		dbi.Where(&exist).First(&exist)
 
 		if exist.ID != 0 {
-			Error("Username exists: username: "+exist.Username+", id: "+fmt.Sprintf("%d", exist.ID), c)
+			Error("Username exists", c)
 			return
 		}
 
 		// Save user to db
+
+		user := &models.User{}
+		user.Username = form.Username
+		user.Password = form.Password
+		user.Nickname = form.Nickname
+
+		if err := user.SetUniqueID(dbi); err != nil {
+			ErrorServer(err, c)
+		}
 
 		dbi2 := dbi.Create(&user)
 
@@ -71,23 +82,10 @@ func (ctrl *UserController) Create(c *gin.Context) {
 
 func (ctrl *UserController) Get(c *gin.Context) {
 
-	userId, exists := c.Get(middlewares.AuthorizedUserId)
-
-	if !exists {
-		Error("User not found", c)
-		return
-	}
+	userId, _ := c.Get(middlewares.AuthorizedUserId)
 
 	user := &models.User{}
-	userIdInt, err2 := strconv.Atoi(fmt.Sprintf("%s", userId))
-
-	if err2 != nil {
-		log.Fatal(err2)
-		Error("User not found", c)
-		return
-	}
-
-	user.ID = uint(userIdInt)
+	user.ID = userId.(uint)
 
 	dbi := db.GetDb()
 	dbi.First(&user)
@@ -123,21 +121,13 @@ func (ctrl *UserController) Auth(c *gin.Context) {
 		} else {
 
 			// Login success, generate token
-			err, token := cache.NewSessionKey()
+			err, accessToken := token.IssueToken(user.ID, login.Remember == "")
 
 			if err != nil {
-				log.Fatal(err)
-				c.AbortWithStatus(500)
-				return
+				ErrorServer(err, c)
 			}
 
-			userIdStr := fmt.Sprint(user.ID)
-			cache.SessionSet(token, userIdStr, login.Remember == "")
-
-			tokenStruct := make(map[string]string)
-			tokenStruct["token"] = token
-
-			Success(tokenStruct, c)
+			Success(accessToken, c)
 		}
 	}
 }

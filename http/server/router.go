@@ -33,15 +33,42 @@ func NewRouter() *gin.Engine {
 
 	v1g := router.Group("v1")
 	{
-		userGroup := v1g.Group("users")
+		// OAuth 2.0 endpoints
+
+		oauthCtrl := new(v1.OAuthController)
+
+		oauthGroup := v1g.Group("oauth")
+		{
+			oauthGroup.GET("google", oauthCtrl.GoogleAuth)
+			oauthGroup.GET("callback/google", oauthCtrl.GoogleAuthCallback)
+		}
+
+		// User endpoints
+
 		userCtrl := new(v1.UserController)
 
-		userGroup.POST("/auth", userCtrl.Auth)
-		userGroup.POST("", userCtrl.Create)
-
-		userGroup.Use(middlewares.AuthMiddleware())
+		userGroup := v1g.Group("users")
 		{
-			userGroup.GET("", userCtrl.Get)
+			userGroup.POST("/auth", userCtrl.Auth)
+			userGroup.POST("", userCtrl.Create)
+
+			userGroup.Use(middlewares.AuthMiddleware())
+			{
+				userGroup.GET("", userCtrl.Get)
+			}
+		}
+
+		// Article endpoints
+
+		articleCtrl := new(v1.ArticleController)
+
+		articleGroup := v1g.Group("articles")
+		{
+			articleGroup.Use(middlewares.AuthMiddleware())
+			{
+				articleGroup.GET("/:article_id", articleCtrl.Get)
+				articleGroup.POST("", articleCtrl.Publish)
+			}
 		}
 	}
 

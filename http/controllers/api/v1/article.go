@@ -14,44 +14,37 @@
  * limitations under the License.
  */
 
-package main
+package v1
 
 import (
-	"github.com/primasio/wormhole/cache"
-	"github.com/primasio/wormhole/config"
+	"github.com/gin-gonic/gin"
 	"github.com/primasio/wormhole/db"
-	"github.com/primasio/wormhole/http/server"
+	"github.com/primasio/wormhole/http/middlewares"
 	"github.com/primasio/wormhole/models"
-	"log"
-	"os"
 )
 
-func main() {
+type ArticleController struct{}
 
-	// Init Environment
-	env := os.Getenv("APP_ENV")
+func (ctrl *ArticleController) Publish(c *gin.Context) {
+	var article models.Article
 
-	if env == "" {
-		env = "development"
+	if err := c.ShouldBind(&article); err != nil {
+		Error(err.Error(), c)
+	} else {
+		dbi := db.GetDb()
+
+		userId, _ := c.Get(middlewares.AuthorizedUserId)
+
+		article.UserId = userId.(uint)
+
+		dbi.Create(&article)
+
+		// TODO: Create async task to publish article to Primas
+
+		Success(article, c)
 	}
+}
 
-	// Init Config
-	config.Init(env, nil)
+func (ctrl *ArticleController) Get(c *gin.Context) {
 
-	// Init Database
-	if err := db.Init(); err != nil {
-		log.Fatal(err)
-	}
-
-	// Init Cache
-	if err := cache.InitCache(); err != nil {
-		log.Fatal(err)
-	}
-
-	if env == "development" {
-		models.AutoMigrateModels()
-	}
-
-	// Start HTTP server
-	server.Init()
 }

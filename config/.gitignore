@@ -1,0 +1,5 @@
+*
+!.gitignore
+!example.yaml
+!test.yaml
+!config.go

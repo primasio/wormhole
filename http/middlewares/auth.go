@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/primasio/wormhole/cache"
 	"log"
+	"strconv"
 )
 
 const AuthorizedUserId = "UserId"
@@ -46,7 +47,15 @@ func AuthMiddleware() gin.HandlerFunc {
 			if userId == "" {
 				c.AbortWithStatus(401)
 			} else {
-				c.Set(AuthorizedUserId, userId)
+
+				userIdNum, err := strconv.Atoi(userId)
+
+				if err != nil {
+					log.Println(err)
+					c.AbortWithStatus(500)
+				}
+
+				c.Set(AuthorizedUserId, uint(userIdNum))
 				c.Next()
 			}
 		}

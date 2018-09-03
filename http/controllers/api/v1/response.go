@@ -31,7 +31,7 @@ func Success(data interface{}, c *gin.Context) {
 }
 
 func ErrorServer(err error, c *gin.Context) {
-	log.Fatal(err)
+	log.Println(err)
 	c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Internal Server Error"})
 }
 

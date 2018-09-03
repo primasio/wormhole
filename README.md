@@ -3,11 +3,13 @@
 [![Build Status](https://travis-ci.com/primasio/wormhole.svg?branch=master)](https://travis-ci.com/primasio/wormhole)
 [![codecov](https://codecov.io/gh/primasio/wormhole/branch/master/graph/badge.svg)](https://codecov.io/gh/primasio/wormhole)
 [![GolangCI](https://golangci.com/badges/github.com/primasio/wormhole.svg)](https://golangci.com)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/primasio/wormhole)
 
 The wormhole, or Einstein–Rosen bridge, connects two different 3D locations from another dimension. It provides a way
 to travel through the space in no time.
 
-The Wormhole project, connects the Internet to the Blockchain, or more precisely, the Primas decentralized network.
+The Wormhole project, connects the Internet to the Blockchain, or more precisely, the
+[Primas Decentralized Network](https://primas.io).
 
 Wormhole is the common part of all the traditional applications that integrate with Primas. It is a showcase of how Primas
 API can be used to implement various of use cases. It can be used as the boilerplate for new applications that want to

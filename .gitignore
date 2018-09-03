@@ -4,3 +4,4 @@ vendor/
 glide.lock
 
 coverage.txt
+*.exe

@@ -22,7 +22,7 @@ import (
 	"log"
 )
 
-func CreateTestUser() (user *models.User, err error) {
+func CreateTestUser() (*models.User, error) {
 
 	u := &models.User{}
 
@@ -35,4 +35,18 @@ func CreateTestUser() (user *models.User, err error) {
 	log.Println("Created test user: " + u.Username)
 
 	return u, nil
+}
+
+func CreateTestArticle(user *models.User) (*models.Article, error) {
+
+	article := &models.Article{}
+
+	randStr := util.RandString(5)
+
+	article.UserId = user.ID
+
+	article.Title = "Test Article " + randStr
+	article.Content = "<p>This is a test article " + randStr + "</p>"
+
+	return article, nil
 }

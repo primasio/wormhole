@@ -16,20 +16,11 @@
 
 package models
 
-import "time"
+const OAuthGoogle = 1
 
-type BaseModel struct {
-	ID        uint `gorm:"primary_key" json:"-"`
-	CreatedAt uint `json:"-"`
-	UpdatedAt uint `json:"-"`
-}
-
-func (model *BaseModel) BeforeCreate() error {
-	model.CreatedAt = uint(time.Now().Unix())
-	return nil
-}
-
-func (model *BaseModel) BeforeUpdate() error {
-	model.UpdatedAt = uint(time.Now().Unix())
-	return nil
+type UserOAuth struct {
+	BaseModel
+	UserID     uint
+	VendorType uint
+	VendorID   string
 }
