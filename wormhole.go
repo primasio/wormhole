@@ -36,10 +36,6 @@ func main() {
 		env = "development"
 	}
 
-	if env == "development" {
-		models.AutoMigrateModels()
-	}
-
 	if env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -57,6 +53,10 @@ func main() {
 	// Init Database
 	if err := db.Init(); err != nil {
 		log.Fatal(err)
+	}
+
+	if env == "development" {
+		models.AutoMigrateModels()
 	}
 
 	// Init Cache
