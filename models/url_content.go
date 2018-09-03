@@ -19,9 +19,10 @@ package models
 type URLContent struct {
 	BaseModel
 	UserId   uint   `json:"-"`
-	URL      string `gorm:"unique_index"`
-	Abstract string `gorm:"type:text"`
-	Content  string `gorm:"type:longtext"`
+	URL      string `gorm:"unique_index" json:"url"`
+	Title    string `gorm:"type:text" json:"title"`
+	Abstract string `gorm:"type:text" json:"abstract"`
+	Content  string `gorm:"type:longtext" json:"content"`
 
 	IsActive     bool `gorm:"default:false" json:"is_active"`
 	Votes        uint `gorm:"default:1" json:"votes"`

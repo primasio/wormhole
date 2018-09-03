@@ -38,6 +38,7 @@ func PrepareURLContent() (error, *models.URLContent) {
 
 	urlContent := &models.URLContent{
 		URL:      "https://cn.primas.io/12345",
+		Title:    "Title of the Content",
 		Content:  "<p>The content of the url.</p>",
 		Abstract: "The content of the url.",
 		UserId:   systemUser.ID,
@@ -54,6 +55,7 @@ func TestURLContentController_Create(t *testing.T) {
 
 	data := url.Values{}
 	data.Set("url", "https://cn.primas.io/abcdefg")
+	data.Set("title", "Title of the Content")
 	data.Set("content", "<p>The content of the url.</p>")
 	data.Set("abstract", "The content of the url.")
 

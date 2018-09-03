@@ -28,6 +28,7 @@ type URLContentController struct{}
 
 type URLContentForm struct {
 	URL      string `form:"url" json:"url" binding:"required"`
+	Title    string `form:"title" json:"title" binding:"required"`
 	Content  string `form:"content" json:"content" binding:"required"`
 	Abstract string `form:"abstract" json:"abstract" binding:"required"`
 }
@@ -55,6 +56,7 @@ func (ctrl *URLContentController) Create(c *gin.Context) {
 		urlContent := &models.URLContent{}
 
 		urlContent.URL = form.URL
+		urlContent.Title = form.Title
 		urlContent.Content = form.Content
 		urlContent.Abstract = form.Abstract
 
