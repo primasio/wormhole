@@ -16,6 +16,12 @@
 
 package models
 
+import (
+	"errors"
+	"github.com/jinzhu/gorm"
+	"github.com/primasio/wormhole/db"
+)
+
 type URLContent struct {
 	BaseModel
 	UserId   uint   `json:"-"`
@@ -24,7 +30,36 @@ type URLContent struct {
 	Abstract string `gorm:"type:text" json:"abstract"`
 	Content  string `gorm:"type:longtext" json:"content"`
 
-	IsActive     bool `gorm:"default:false" json:"is_active"`
+	IsActive     bool `gorm:"default:true" json:"is_active"`
 	Votes        uint `gorm:"default:1" json:"votes"`
 	TotalComment uint `gorm:"default:0" json:"total_comment"`
+}
+
+func CleanURL(url string) string {
+	//TODO: Remove trailing slash, remove hash, etc.
+	return url
+}
+
+func GetURLContentByURL(url string, dbi *gorm.DB, forUpdate bool) (error, *URLContent) {
+	if url == "" {
+		return errors.New("url is empty"), nil
+	}
+
+	url = CleanURL(url)
+
+	var urlContent URLContent
+
+	sql := "SELECT * FROM url_contents WHERE url = ?"
+
+	if forUpdate && db.GetDbType() != "sqlite3" {
+		sql = sql + " FOR UPDATE"
+	}
+
+	dbi.Raw(sql, url).Scan(&urlContent)
+
+	if urlContent.ID == 0 {
+		return nil, nil
+	}
+
+	return nil, &urlContent
 }

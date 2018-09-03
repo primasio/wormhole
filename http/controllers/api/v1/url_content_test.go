@@ -180,6 +180,7 @@ func TestURLContentController_Vote(t *testing.T) {
 }
 
 func TestURLContentController_List(t *testing.T) {
+	ResetDB()
 	PrepareSystemUser()
 
 	// Create a list of url content

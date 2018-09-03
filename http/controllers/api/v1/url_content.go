@@ -43,12 +43,14 @@ func (ctrl *URLContentController) Create(c *gin.Context) {
 		dbi := db.GetDb()
 
 		// Check URL uniqueness
-		exist := &models.URLContent{}
-		exist.URL = form.URL
+		err, check := models.GetURLContentByURL(form.URL, dbi, false)
 
-		dbi.Where(&exist).First(&exist)
+		if err != nil {
+			ErrorServer(err, c)
+			return
+		}
 
-		if exist.ID != 0 {
+		if check != nil {
 			Error("URL exists", c)
 			return
 		}
@@ -56,7 +58,7 @@ func (ctrl *URLContentController) Create(c *gin.Context) {
 		// Save url to db
 		urlContent := &models.URLContent{}
 
-		urlContent.URL = form.URL
+		urlContent.URL = models.CleanURL(form.URL)
 		urlContent.Title = form.Title
 		urlContent.Content = form.Content
 		urlContent.Abstract = form.Abstract
@@ -90,10 +92,7 @@ func (ctrl *URLContentController) List(c *gin.Context) {
 	query = query.Where("is_active = ?", urlType != "voting")
 	query = query.Order("created_at DESC").Offset(offsetNum).Limit(pageSize)
 
-	if err := query.Find(&urlList).Error; err != nil {
-		ErrorServer(err, c)
-		return
-	}
+	query.Find(&urlList)
 
 	Success(urlList, c)
 }
@@ -102,10 +101,15 @@ func (ctrl *URLContentController) Get(c *gin.Context) {
 
 	url := c.Query("url")
 
-	err, urlContent := findURL(url)
+	err, urlContent := models.GetURLContentByURL(url, db.GetDb(), false)
 
 	if err != nil {
-		ErrorNotFound(err, c)
+		ErrorServer(err, c)
+		return
+	}
+
+	if urlContent == nil {
+		ErrorNotFound(errors.New("url not found"), c)
 		return
 	}
 
@@ -116,10 +120,15 @@ func (ctrl *URLContentController) Vote(c *gin.Context) {
 
 	url := c.Query("url")
 
-	err, urlContent := findURL(url)
+	err, urlContent := models.GetURLContentByURL(url, db.GetDb(), false)
 
 	if err != nil {
-		ErrorNotFound(err, c)
+		ErrorServer(err, c)
+		return
+	}
+
+	if urlContent == nil {
+		ErrorNotFound(errors.New("url not found"), c)
 		return
 	}
 
@@ -196,23 +205,4 @@ func (ctrl *URLContentController) Vote(c *gin.Context) {
 
 	tx.Commit()
 	Success(lockedURLContent, c)
-}
-
-func findURL(url string) (error, *models.URLContent) {
-	if url == "" {
-		return errors.New("url is empty"), nil
-	}
-
-	urlContent := &models.URLContent{}
-
-	urlContent.URL = url
-
-	dbi := db.GetDb()
-	dbi.Where(&urlContent).First(&urlContent)
-
-	if urlContent.ID == 0 {
-		return errors.New("url not found"), nil
-	}
-
-	return nil, urlContent
 }

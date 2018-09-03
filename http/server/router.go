@@ -77,6 +77,20 @@ func NewRouter() *gin.Engine {
 
 		urlContentGroup := v1g.Group("urls")
 		{
+			// URL Content Comments endpoints
+
+			urlContentCommentCtrl := new(v1.URLContentCommentController)
+			urlContentCommentGroup := urlContentGroup.Group("comments")
+			{
+				urlContentCommentGroup.GET("", urlContentCommentCtrl.List)
+
+				urlContentCommentGroup.Use(middlewares.AuthMiddleware())
+				{
+					urlContentCommentGroup.POST("", urlContentCommentCtrl.Create)
+					urlContentCommentGroup.DELETE("/:comment_id", urlContentCommentCtrl.Delete)
+				}
+			}
+
 			urlContentGroup.GET("/url", urlContentCtrl.Get)
 			urlContentGroup.GET("", urlContentCtrl.List)
 
@@ -86,6 +100,7 @@ func NewRouter() *gin.Engine {
 				urlContentGroup.PUT("/url", urlContentCtrl.Vote)
 			}
 		}
+
 	}
 
 	return router

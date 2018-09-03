@@ -107,6 +107,29 @@ func PrepareAuthToken(t *testing.T) {
 	log.Println("token: " + authToken)
 }
 
+func ResetDB() {
+
+	tables := []string{
+		"articles",
+		"url_contents",
+		"url_content_comments",
+		"url_content_votes",
+	}
+
+	dbi := db.GetDb()
+	var sql string
+
+	if db.GetDbType() == "sqlite3" {
+		sql = "DELETE FROM"
+	} else {
+		sql = "TRUNCATE TABLE"
+	}
+
+	for _, table := range tables {
+		dbi.Exec(sql + " " + table)
+	}
+}
+
 func before() {
 	log.Println("Setting up test environment")
 	tests.InitTestEnv("../../../../config/")
