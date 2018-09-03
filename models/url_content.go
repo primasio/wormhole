@@ -47,7 +47,9 @@ func GetURLHashKey(url string) string {
 
 	cleaned := CleanURL(url)
 
-	return hex.EncodeToString(sha1.Sum([]byte(cleaned))[:])
+	sumBytes := sha1.Sum([]byte(cleaned))
+
+	return hex.EncodeToString(sumBytes[:])
 }
 
 func GetURLContentByURL(url string, dbi *gorm.DB, forUpdate bool) (error, *URLContent) {
