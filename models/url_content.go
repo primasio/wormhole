@@ -63,7 +63,7 @@ func GetURLContentByURL(url string, dbi *gorm.DB, forUpdate bool) (error, *URLCo
 
 	sql := "SELECT * FROM url_contents WHERE hash_key = ?"
 
-	if forUpdate && db.GetDbType() != "sqlite3" {
+	if forUpdate && db.GetDbType() != db.SQLITE {
 		sql = sql + " FOR UPDATE"
 	}
 

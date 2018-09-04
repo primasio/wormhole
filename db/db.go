@@ -25,6 +25,11 @@ import (
 	"os"
 )
 
+const (
+	SQLITE = "sqlite3"
+	MYSQL  = "mysql"
+)
+
 var instance *gorm.DB
 var instanceType string
 
