@@ -28,8 +28,8 @@ import (
 
 type User struct {
 	BaseModel
-	UniqueID string `json:"id" gorm:"unique_index"`
-	Username string `json:"-" gorm:"index"`
+	UniqueID string `json:"id" gorm:"type:varchar(128);unique_index"`
+	Username string `json:"-" gorm:"type:varchar(128);index"`
 	Password string `json:"-"`
 	Salt     string `json:"-"`
 	Nickname string `json:"nickname"`

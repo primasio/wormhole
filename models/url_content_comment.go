@@ -25,7 +25,7 @@ import (
 type URLContentComment struct {
 	BaseModel
 
-	UniqueID     string `gorm:"unique_index" json:"id"`
+	UniqueID     string `gorm:"type:varchar(128);unique_index" json:"id"`
 	UserId       uint   `json:"-"`
 	URLContentId uint   `json:"-"`
 	Content      string `gorm:"type:longtext" json:"content"`

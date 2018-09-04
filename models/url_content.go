@@ -31,7 +31,7 @@ type URLContent struct {
 	Title    string `gorm:"type:text" json:"title"`
 	Abstract string `gorm:"type:text" json:"abstract"`
 	Content  string `gorm:"type:longtext" json:"content"`
-	HashKey  string `gorm:"type:varchar(255);unique_index" json:"-"`
+	HashKey  string `gorm:"type:varchar(128);unique_index" json:"-"`
 
 	IsActive     bool `gorm:"default:false" json:"is_active"`
 	Votes        uint `gorm:"default:1" json:"votes"`
