@@ -103,3 +103,23 @@ func TestURLContentCommentController_List(t *testing.T) {
 	log.Println(w.Body.String())
 	assert.Equal(t, w.Code, 200)
 }
+
+func TestURLContentCommentController_Delete(t *testing.T) {
+
+	PrepareAuthToken(t)
+
+	err, urlContent := PrepareURLContent()
+	assert.Equal(t, err, nil)
+
+	err, comment := PrepareURLContentComment(urlContent)
+	assert.Equal(t, err, nil)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/v1/urls/comments/"+comment.UniqueID, nil)
+	req.Header.Add("Authorization", authToken)
+
+	router.ServeHTTP(w, req)
+
+	log.Println(w.Body.String())
+	assert.Equal(t, w.Code, 200)
+}

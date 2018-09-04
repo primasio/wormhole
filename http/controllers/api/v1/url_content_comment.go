@@ -92,6 +92,23 @@ func (ctrl *URLContentCommentController) Create(c *gin.Context) {
 
 func (ctrl *URLContentCommentController) Delete(c *gin.Context) {
 
+	commentId := c.Param("comment_id")
+
+	comment := &models.URLContentComment{}
+	comment.UniqueID = commentId
+
+	dbi := db.GetDb()
+	dbi.Where(comment).First(&comment)
+
+	if comment.ID == 0 {
+		ErrorNotFound(errors.New("comment not found"), c)
+		return
+	}
+
+	comment.IsDeleted = true
+	dbi.Save(comment)
+
+	Success(nil, c)
 }
 
 func (ctrl *URLContentCommentController) List(c *gin.Context) {
@@ -119,7 +136,7 @@ func (ctrl *URLContentCommentController) List(c *gin.Context) {
 	} else {
 		var commentList []models.URLContentComment
 
-		query := dbi.Where("url_content_id = ?", urlContent.ID)
+		query := dbi.Where("url_content_id = ? AND is_deleted = 0", urlContent.ID)
 		query.Offset(offsetNum).Limit(pageSize).Find(&commentList)
 
 		Success(commentList, c)
