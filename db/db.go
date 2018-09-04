@@ -61,5 +61,7 @@ func Init() error {
 		return err
 	}
 
+	instance.Set("gorm:table_options", "charset=utf8mb4")
+
 	return nil
 }
