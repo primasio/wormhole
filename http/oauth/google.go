@@ -23,6 +23,7 @@ import (
 	"github.com/primasio/wormhole/models"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	"io/ioutil"
 	"log"
 )
 
@@ -83,14 +84,16 @@ func HandleGoogleAuthCallback(code string) (err error, userId uint) {
 
 	defer resp.Body.Close()
 
+	body, err := ioutil.ReadAll(resp.Body)
+	bodyString := string(body)
+
+	log.Println("google response: " + bodyString)
+
 	userInfo := &UserInfoResponse{}
 
-	if e := json.NewDecoder(resp.Body).Decode(userInfo); e != nil {
-		return e, 0
+	if err := json.Unmarshal(body, &userInfo); err != nil {
+		return err, 0
 	}
-
-	log.Println("Google OAuth email: " + userInfo.email)
-	log.Println("Google OAuth name: " + userInfo.name)
 
 	// 3. Process user info
 
