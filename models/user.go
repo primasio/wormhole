@@ -69,8 +69,11 @@ func (user *User) BeforeCreate() error {
 
 	user.CreatedAt = uint(time.Now().Unix())
 
-	user.setSalt()
-	user.hashPassword()
+	if user.Password != "" {
+		user.setSalt()
+		user.hashPassword()
+	}
+
 	user.SetBalance(big.NewInt(0))
 
 	return nil
