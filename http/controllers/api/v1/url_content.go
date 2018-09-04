@@ -62,7 +62,6 @@ func (ctrl *URLContentController) Create(c *gin.Context) {
 		urlContent.Title = form.Title
 		urlContent.Content = form.Content
 		urlContent.Abstract = form.Abstract
-		urlContent.IsActive = true
 		urlContent.HashKey = models.GetURLHashKey(form.URL)
 
 		userId, _ := c.Get(middlewares.AuthorizedUserId)
