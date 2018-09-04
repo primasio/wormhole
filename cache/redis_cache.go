@@ -18,14 +18,12 @@ package cache
 
 import (
 	"errors"
-	"github.com/gin-contrib/cache/persistence"
 	"time"
 
 	"github.com/dpordomingo/go-gingonic-cache/utils"
 	"github.com/garyburd/redigo/redis"
 )
 
-// RedisStore represents the cache with redis persistence
 type RedisStore struct {
 	pool              *redis.Pool
 	defaultExpiration time.Duration
@@ -77,7 +75,7 @@ func (c *RedisStore) Set(key string, value interface{}, expires time.Duration) e
 func (c *RedisStore) Add(key string, value interface{}, expires time.Duration) error {
 	conn := c.pool.Get()
 	if exists(conn, key) {
-		return persistence.ErrNotStored
+		return ErrNotStored
 	}
 	return c.invoke(conn.Do, key, value, expires)
 }
@@ -86,11 +84,11 @@ func (c *RedisStore) Add(key string, value interface{}, expires time.Duration) e
 func (c *RedisStore) Replace(key string, value interface{}, expires time.Duration) error {
 	conn := c.pool.Get()
 	if !exists(conn, key) {
-		return persistence.ErrNotStored
+		return ErrNotStored
 	}
 	err := c.invoke(conn.Do, key, value, expires)
 	if value == nil {
-		return persistence.ErrNotStored
+		return ErrNotStored
 	}
 
 	return err
@@ -102,7 +100,7 @@ func (c *RedisStore) Get(key string, ptrValue interface{}) error {
 	defer conn.Close()
 	raw, err := conn.Do("GET", key)
 	if raw == nil {
-		return persistence.ErrCacheMiss
+		return ErrCacheMiss
 	}
 	item, err := redis.Bytes(raw, err)
 	if err != nil {
@@ -121,7 +119,7 @@ func (c *RedisStore) Delete(key string) error {
 	conn := c.pool.Get()
 	defer conn.Close()
 	if !exists(conn, key) {
-		return persistence.ErrCacheMiss
+		return ErrCacheMiss
 	}
 	_, err := conn.Do("DEL", key)
 	return err
@@ -160,9 +158,9 @@ func (c *RedisStore) invoke(f func(string, ...interface{}) (interface{}, error),
 	key string, value interface{}, expires time.Duration) error {
 
 	switch expires {
-	case persistence.DEFAULT:
+	case DEFAULT:
 		expires = c.defaultExpiration
-	case persistence.FOREVER:
+	case FOREVER:
 		expires = time.Duration(0)
 	}
 
