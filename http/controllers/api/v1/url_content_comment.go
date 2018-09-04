@@ -134,6 +134,12 @@ func (ctrl *URLContentCommentController) List(c *gin.Context) {
 		ErrorServer(err, c)
 		return
 	} else {
+
+		if urlContent == nil {
+			ErrorNotFound(errors.New("url not found"), c)
+			return
+		}
+
 		var commentList []models.URLContentComment
 
 		query := dbi.Where("url_content_id = ? AND is_deleted = 0", urlContent.ID)
