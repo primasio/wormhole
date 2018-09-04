@@ -143,7 +143,7 @@ func (ctrl *URLContentCommentController) List(c *gin.Context) {
 		var commentList []models.URLContentComment
 
 		query := dbi.Where("url_content_id = ? AND is_deleted = 0", urlContent.ID)
-		query.Offset(offsetNum).Limit(pageSize).Find(&commentList)
+		query.Order("created_at DESC").Offset(offsetNum).Limit(pageSize).Find(&commentList)
 
 		Success(commentList, c)
 	}
