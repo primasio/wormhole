@@ -29,7 +29,7 @@ import (
 type User struct {
 	BaseModel
 	UniqueID string `json:"id" gorm:"unique_index"`
-	Username string `json:"-"`
+	Username string `json:"-" gorm:"index"`
 	Password string `json:"-"`
 	Salt     string `json:"-"`
 	Nickname string `json:"nickname"`

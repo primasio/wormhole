@@ -70,6 +70,37 @@ func NewRouter() *gin.Engine {
 				articleGroup.POST("", articleCtrl.Publish)
 			}
 		}
+
+		// URL Content endpoints
+
+		urlContentCtrl := new(v1.URLContentController)
+
+		urlContentGroup := v1g.Group("urls")
+		{
+			// URL Content Comments endpoints
+
+			urlContentCommentCtrl := new(v1.URLContentCommentController)
+			urlContentCommentGroup := urlContentGroup.Group("comments")
+			{
+				urlContentCommentGroup.GET("", urlContentCommentCtrl.List)
+
+				urlContentCommentGroup.Use(middlewares.AuthMiddleware())
+				{
+					urlContentCommentGroup.POST("", urlContentCommentCtrl.Create)
+					urlContentCommentGroup.DELETE("/:comment_id", urlContentCommentCtrl.Delete)
+				}
+			}
+
+			urlContentGroup.GET("/url", urlContentCtrl.Get)
+			urlContentGroup.GET("", urlContentCtrl.List)
+
+			urlContentGroup.Use(middlewares.AuthMiddleware())
+			{
+				urlContentGroup.POST("", urlContentCtrl.Create)
+				urlContentGroup.PUT("/url", urlContentCtrl.Vote)
+			}
+		}
+
 	}
 
 	return router

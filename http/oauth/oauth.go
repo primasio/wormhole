@@ -19,6 +19,7 @@ package oauth
 import (
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/models"
+	"log"
 )
 
 type OAuthResult struct {
@@ -52,6 +53,9 @@ func (oauthResult *OAuthResult) Process() (err error, userId uint) {
 	user := &models.User{}
 	user.Username = ""
 	user.Password = ""
+
+	log.Println("OAuth name: " + oauthResult.Name)
+	log.Println("OAuth email: " + oauthResult.Email)
 
 	if oauthResult.Name != "" {
 		user.Nickname = oauthResult.Name

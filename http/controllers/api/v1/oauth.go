@@ -18,6 +18,7 @@ package v1
 
 import (
 	"errors"
+	"github.com/gin-contrib/cache/persistence"
 	"github.com/gin-gonic/gin"
 	"github.com/primasio/wormhole/cache"
 	"github.com/primasio/wormhole/http/oauth"
@@ -62,7 +63,13 @@ func (ctrl *OAuthController) GoogleAuthCallback(c *gin.Context) {
 	// Check state
 
 	if err := cache.GetCache().Get("oauth_state_"+state, &redirectUri); err != nil {
-		ErrorServer(err, c)
+
+		if err != persistence.ErrCacheMiss && err != persistence.ErrNotStored {
+			ErrorUnauthorized("state expired", c)
+		} else {
+			ErrorServer(err, c)
+		}
+
 		return
 	}
 

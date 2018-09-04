@@ -17,6 +17,7 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/primasio/wormhole/cache"
 	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
@@ -35,21 +36,32 @@ func main() {
 		env = "development"
 	}
 
+	if env == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	// Init Config
-	config.Init(env, nil)
+
+	configDir := os.Getenv("CONFIG")
+
+	if configDir != "" {
+		config.Init(env, &configDir)
+	} else {
+		config.Init(env, nil)
+	}
 
 	// Init Database
 	if err := db.Init(); err != nil {
 		log.Fatal(err)
 	}
 
+	if env == "development" {
+		models.AutoMigrateModels()
+	}
+
 	// Init Cache
 	if err := cache.InitCache(); err != nil {
 		log.Fatal(err)
-	}
-
-	if env == "development" {
-		models.AutoMigrateModels()
 	}
 
 	// Start HTTP server

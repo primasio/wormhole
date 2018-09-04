@@ -90,7 +90,7 @@ func (ctrl *UserController) Get(c *gin.Context) {
 	dbi := db.GetDb()
 	dbi.First(&user)
 
-	if user.Username == "" {
+	if user.CreatedAt == 0 {
 		Error("User not found", c)
 		return
 	}
