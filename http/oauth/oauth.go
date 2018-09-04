@@ -77,6 +77,8 @@ func (oauthResult *OAuthResult) Process() (err error, userId uint) {
 		return err, 0
 	}
 
+	userOAuth.UserID = user.ID
+
 	if err := tx.Create(&userOAuth).Error; err != nil {
 		tx.Rollback()
 		return err, 0
