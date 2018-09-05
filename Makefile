@@ -11,6 +11,7 @@ dist: build-linux-x64
 	cp README.md dist/
 	cp scripts/Dockerfile dist/
 	cp scripts/docker-compose.yml dist/
+	cp -r scripts/certs dist/certs
 
 .PHONY: test
 test: deps
