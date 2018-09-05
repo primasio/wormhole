@@ -9,7 +9,8 @@ dist: build-linux-x64
 	cp index.html dist/
 	cp LICENSE dist/
 	cp README.md dist/
-	cp Dockerfile dist/
+	cp scripts/Dockerfile dist/
+	cp scripts/docker-compose.yml dist/
 
 .PHONY: test
 test: deps
