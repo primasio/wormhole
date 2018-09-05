@@ -51,7 +51,7 @@ func Init() error {
 	if dbConn == "" {
 		f, err := ioutil.TempFile("", "")
 		if err != nil {
-			panic(err)
+			return err
 		}
 		dbConn := f.Name()
 		f.Close()

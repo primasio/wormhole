@@ -3,10 +3,13 @@
 all: dist
 
 .PHONY: deps dist
-	dist: build-linux-x64
+dist: build-linux-x64
 	mkdir dist/config
 	cp config/*.yaml dist/config/
 	cp index.html dist/
+	cp LICENSE dist/
+	cp README.md dist/
+	cp Dockerfile dist/
 
 .PHONY: test
 test: deps
@@ -23,4 +26,4 @@ deps:
 
 .PHONY: build-linux-x64
 build-linux-x64:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dist/wormhole -v
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dist/bin/wormhole -v

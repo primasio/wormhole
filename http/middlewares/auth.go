@@ -18,8 +18,8 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/golang/glog"
 	"github.com/primasio/wormhole/cache"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -41,7 +41,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if err, userId := cache.SessionGet(reqToken); err != nil {
 
-			log.Println("token not exist", err)
+			glog.Error("token not exist", err)
 			c.AbortWithStatus(500)
 
 		} else {
@@ -53,7 +53,7 @@ func AuthMiddleware() gin.HandlerFunc {
 				userIdNum, err := strconv.Atoi(userId)
 
 				if err != nil {
-					log.Println(err)
+					glog.Error(err)
 					c.AbortWithStatus(500)
 					return
 				}
@@ -65,7 +65,7 @@ func AuthMiddleware() gin.HandlerFunc {
 				err, reached := rateLimitReached(userId)
 
 				if err != nil {
-					log.Println(err)
+					glog.Error(err)
 					c.AbortWithStatus(http.StatusInternalServerError)
 				} else {
 					if reached {

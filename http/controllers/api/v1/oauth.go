@@ -23,7 +23,6 @@ import (
 	"github.com/primasio/wormhole/http/oauth"
 	"github.com/primasio/wormhole/http/token"
 	"github.com/primasio/wormhole/util"
-	"log"
 	"time"
 )
 
@@ -94,8 +93,7 @@ func (ctrl *OAuthController) GoogleAuthCallback(c *gin.Context) {
 	err, accessToken := token.IssueToken(userId, false)
 
 	if err != nil {
-		log.Println(err)
-		Error(err.Error(), c)
+		ErrorServer(err, c)
 		return
 	}
 

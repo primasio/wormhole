@@ -17,17 +17,20 @@
 package main
 
 import (
+	"flag"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/glog"
 	"github.com/primasio/wormhole/cache"
 	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/http/server"
 	"github.com/primasio/wormhole/models"
-	"log"
 	"os"
 )
 
 func main() {
+
+	flag.Parse()
 
 	// Init Environment
 	env := os.Getenv("APP_ENV")
@@ -41,18 +44,25 @@ func main() {
 	}
 
 	// Init Config
+	configDir := os.Getenv("APP_CONFIG")
 
-	configDir := os.Getenv("CONFIG")
+	var err error
 
 	if configDir != "" {
-		config.Init(env, &configDir)
+		err = config.Init(env, &configDir)
 	} else {
-		config.Init(env, nil)
+		err = config.Init(env, nil)
+	}
+
+	if err != nil {
+		glog.Error(err)
+		os.Exit(1)
 	}
 
 	// Init Database
 	if err := db.Init(); err != nil {
-		log.Fatal(err)
+		glog.Error(err)
+		os.Exit(1)
 	}
 
 	if env == "development" {
@@ -61,7 +71,8 @@ func main() {
 
 	// Init Cache
 	if err := cache.InitCache(); err != nil {
-		log.Fatal(err)
+		glog.Error(err)
+		os.Exit(1)
 	}
 
 	// Start HTTP server
