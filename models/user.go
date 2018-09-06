@@ -28,8 +28,8 @@ import (
 
 type User struct {
 	BaseModel
-	UniqueID string `json:"id" gorm:"unique_index"`
-	Username string `json:"-" gorm:"index"`
+	UniqueID string `json:"id" gorm:"type:varchar(128);unique_index"`
+	Username string `json:"-" gorm:"type:varchar(128);index"`
 	Password string `json:"-"`
 	Salt     string `json:"-"`
 	Nickname string `json:"nickname"`
@@ -69,8 +69,11 @@ func (user *User) BeforeCreate() error {
 
 	user.CreatedAt = uint(time.Now().Unix())
 
-	user.setSalt()
-	user.hashPassword()
+	if user.Password != "" {
+		user.setSalt()
+		user.hashPassword()
+	}
+
 	user.SetBalance(big.NewInt(0))
 
 	return nil

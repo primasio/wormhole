@@ -18,7 +18,7 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
-	"log"
+	"github.com/golang/glog"
 	"net/http"
 )
 
@@ -31,7 +31,7 @@ func Success(data interface{}, c *gin.Context) {
 }
 
 func ErrorServer(err error, c *gin.Context) {
-	log.Println(err)
+	glog.Error(err)
 	c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Internal Server Error"})
 }
 

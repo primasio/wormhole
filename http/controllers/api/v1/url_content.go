@@ -157,7 +157,7 @@ func (ctrl *URLContentController) Vote(c *gin.Context) {
 
 	sql := "SELECT * FROM url_contents WHERE id = ?"
 
-	if db.GetDbType() != "sqlite3" {
+	if db.GetDbType() != db.SQLITE {
 		sql = sql + " FOR UPDATE"
 	}
 

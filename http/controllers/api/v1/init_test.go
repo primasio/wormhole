@@ -119,7 +119,7 @@ func ResetDB() {
 	dbi := db.GetDb()
 	var sql string
 
-	if db.GetDbType() == "sqlite3" {
+	if db.GetDbType() == db.SQLITE {
 		sql = "DELETE FROM"
 	} else {
 		sql = "TRUNCATE TABLE"

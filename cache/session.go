@@ -18,7 +18,6 @@ package cache
 
 import (
 	"errors"
-	"github.com/gin-contrib/cache/persistence"
 	"github.com/primasio/wormhole/util"
 	"time"
 )
@@ -73,7 +72,7 @@ func SessionGet(token string) (err error, userId string) {
 	var userIdStore string
 
 	if err := store.Get(sessionPrefix+token, &userIdStore); err != nil {
-		if err != persistence.ErrCacheMiss && err != persistence.ErrNotStored {
+		if err != ErrCacheMiss && err != ErrNotStored {
 			return err, ""
 		}
 	}

@@ -1,0 +1,11 @@
+---
+version: '3'
+services:
+  wormhole:
+    image: "primasio/wormhole"
+    ports:
+     - "80:80"
+    volumes:
+     - /primas/components/wormhole/config:/wormhole/config
+     - /primas/components/wormhole/logs:/wormhole/logs
+    command: -log_dir="/wormhole/logs" -v=1

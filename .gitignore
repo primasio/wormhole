@@ -1,7 +1,6 @@
 .idea/
 vendor/
-
-glide.lock
+log/
 
 coverage.txt
 *.exe

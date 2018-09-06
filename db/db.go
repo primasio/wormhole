@@ -25,6 +25,11 @@ import (
 	"os"
 )
 
+const (
+	SQLITE = "sqlite3"
+	MYSQL  = "mysql"
+)
+
 var instance *gorm.DB
 var instanceType string
 
@@ -46,7 +51,7 @@ func Init() error {
 	if dbConn == "" {
 		f, err := ioutil.TempFile("", "")
 		if err != nil {
-			panic(err)
+			return err
 		}
 		dbConn := f.Name()
 		f.Close()

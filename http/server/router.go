@@ -20,6 +20,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/primasio/wormhole/http/controllers/api/v1"
 	"github.com/primasio/wormhole/http/middlewares"
+	"github.com/szuecs/gin-glog"
+	"time"
 )
 
 func NewRouter() *gin.Engine {
@@ -27,7 +29,7 @@ func NewRouter() *gin.Engine {
 	gin.DisableConsoleColor()
 
 	router := gin.New()
-	router.Use(gin.Logger())
+	router.Use(ginglog.Logger(3 * time.Second))
 	router.Use(gin.Recovery())
 	router.Use(SetResponseHeader())
 

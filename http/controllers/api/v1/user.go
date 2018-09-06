@@ -125,6 +125,7 @@ func (ctrl *UserController) Auth(c *gin.Context) {
 
 			if err != nil {
 				ErrorServer(err, c)
+				return
 			}
 
 			Success(accessToken, c)

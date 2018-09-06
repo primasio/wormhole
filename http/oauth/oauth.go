@@ -17,9 +17,9 @@
 package oauth
 
 import (
+	"errors"
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/models"
-	"log"
 )
 
 type OAuthResult struct {
@@ -34,6 +34,10 @@ func (oauthResult *OAuthResult) Process() (err error, userId uint) {
 
 	// Find the corresponding user in our DB
 	// or create one if not exists
+
+	if oauthResult.Id == "" || oauthResult.Type == 0 {
+		return errors.New("missing id or type in oauth response"), 0
+	}
 
 	userOAuth := &models.UserOAuth{
 		VendorType: oauthResult.Type,
@@ -54,9 +58,6 @@ func (oauthResult *OAuthResult) Process() (err error, userId uint) {
 	user.Username = ""
 	user.Password = ""
 
-	log.Println("OAuth name: " + oauthResult.Name)
-	log.Println("OAuth email: " + oauthResult.Email)
-
 	if oauthResult.Name != "" {
 		user.Nickname = oauthResult.Name
 	} else {
@@ -75,6 +76,8 @@ func (oauthResult *OAuthResult) Process() (err error, userId uint) {
 		tx.Rollback()
 		return err, 0
 	}
+
+	userOAuth.UserID = user.ID
 
 	if err := tx.Create(&userOAuth).Error; err != nil {
 		tx.Rollback()

@@ -31,7 +31,7 @@ type URLContent struct {
 	Title    string `gorm:"type:text" json:"title"`
 	Abstract string `gorm:"type:text" json:"abstract"`
 	Content  string `gorm:"type:longtext" json:"content"`
-	HashKey  string `gorm:"type:varchar(255);unique_index" json:"-"`
+	HashKey  string `gorm:"type:varchar(128);unique_index" json:"-"`
 
 	IsActive     bool `gorm:"default:false" json:"is_active"`
 	Votes        uint `gorm:"default:1" json:"votes"`
@@ -63,7 +63,7 @@ func GetURLContentByURL(url string, dbi *gorm.DB, forUpdate bool) (error, *URLCo
 
 	sql := "SELECT * FROM url_contents WHERE hash_key = ?"
 
-	if forUpdate && db.GetDbType() != "sqlite3" {
+	if forUpdate && db.GetDbType() != db.SQLITE {
 		sql = sql + " FOR UPDATE"
 	}
 

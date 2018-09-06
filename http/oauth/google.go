@@ -23,16 +23,15 @@ import (
 	"github.com/primasio/wormhole/models"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-	"log"
 )
 
 var googleOAuthConfig *oauth2.Config
 
-type UserInfoResponse struct {
-	id      string
-	email   string
-	name    string
-	picture string
+type GoogleUserInfoResponse struct {
+	Id      string `json:"id"`
+	Email   string `json:"email"`
+	Name    string `json:"name"`
+	Picture string `json:"picture"`
 }
 
 func getGoogleOAuthConfig() *oauth2.Config {
@@ -83,23 +82,20 @@ func HandleGoogleAuthCallback(code string) (err error, userId uint) {
 
 	defer resp.Body.Close()
 
-	userInfo := &UserInfoResponse{}
+	userInfo := &GoogleUserInfoResponse{}
 
 	if e := json.NewDecoder(resp.Body).Decode(userInfo); e != nil {
 		return e, 0
 	}
 
-	log.Println("Google OAuth email: " + userInfo.email)
-	log.Println("Google OAuth name: " + userInfo.name)
-
 	// 3. Process user info
 
 	result := &OAuthResult{
 		Type:      models.OAuthGoogle,
-		Id:        userInfo.id,
-		Email:     userInfo.email,
-		Name:      userInfo.name,
-		AvatarURL: userInfo.picture,
+		Id:        userInfo.Id,
+		Email:     userInfo.Email,
+		Name:      userInfo.Name,
+		AvatarURL: userInfo.Picture,
 	}
 
 	if err, userId := result.Process(); err != nil {

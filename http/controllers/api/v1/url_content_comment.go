@@ -92,6 +92,65 @@ func (ctrl *URLContentCommentController) Create(c *gin.Context) {
 
 func (ctrl *URLContentCommentController) Delete(c *gin.Context) {
 
+	commentId := c.Param("comment_id")
+
+	comment := &models.URLContentComment{}
+	comment.UniqueID = commentId
+
+	tx := db.GetDb().Begin()
+	tx.Where(comment).First(&comment)
+
+	if comment.ID == 0 {
+		tx.Rollback()
+		ErrorNotFound(errors.New("comment not found"), c)
+		return
+	}
+
+	sql := "SELECT id, total_comment FROM url_contents WHERE id = ?"
+
+	if db.GetDbType() != db.SQLITE {
+		sql = sql + " FOR UPDATE"
+	}
+
+	var urlContent models.URLContent
+
+	tx.Raw(sql, comment.URLContentId).Scan(&urlContent)
+
+	if urlContent.ID == 0 {
+		tx.Rollback()
+		ErrorNotFound(errors.New("url not found"), c)
+		return
+	}
+
+	lockedComment := &models.URLContentComment{}
+	lockedComment.ID = comment.ID
+
+	tx.Select("id, is_deleted, created_at").Where(lockedComment).First(&lockedComment)
+
+	if lockedComment.CreatedAt == 0 {
+		tx.Rollback()
+		ErrorNotFound(errors.New("comment not found"), c)
+		return
+	}
+
+	lockedComment.IsDeleted = true
+	if err := tx.Save(lockedComment).Error; err != nil {
+		tx.Rollback()
+		ErrorServer(err, c)
+		return
+	}
+
+	urlContent.TotalComment--
+
+	if err := tx.Save(&urlContent).Error; err != nil {
+		tx.Rollback()
+		ErrorServer(err, c)
+		return
+	}
+
+	tx.Commit()
+
+	Success(nil, c)
 }
 
 func (ctrl *URLContentCommentController) List(c *gin.Context) {
@@ -117,10 +176,16 @@ func (ctrl *URLContentCommentController) List(c *gin.Context) {
 		ErrorServer(err, c)
 		return
 	} else {
+
+		if urlContent == nil {
+			ErrorNotFound(errors.New("url not found"), c)
+			return
+		}
+
 		var commentList []models.URLContentComment
 
-		query := dbi.Where("url_content_id = ?", urlContent.ID)
-		query.Offset(offsetNum).Limit(pageSize).Find(&commentList)
+		query := dbi.Where("url_content_id = ? AND is_deleted = 0", urlContent.ID)
+		query.Order("created_at DESC").Offset(offsetNum).Limit(pageSize).Find(&commentList)
 
 		Success(commentList, c)
 	}
