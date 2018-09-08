@@ -2,8 +2,8 @@
 
 all: dist
 
-.PHONY: deps dist
-dist: build-linux-x64
+.PHONY: dist
+dist: deps build-linux-x64
 	mkdir dist/config
 	cp config/*.yaml dist/config/
 	cp index.html dist/
