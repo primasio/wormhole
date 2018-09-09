@@ -125,7 +125,7 @@ func (ctrl *URLContentCommentController) Delete(c *gin.Context) {
 	lockedComment := &models.URLContentComment{}
 	lockedComment.ID = comment.ID
 
-	tx.Select("id, is_deleted, created_at").Where(lockedComment).First(&lockedComment)
+	tx.Where(lockedComment).First(&lockedComment)
 
 	if lockedComment.CreatedAt == 0 {
 		tx.Rollback()
