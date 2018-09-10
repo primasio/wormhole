@@ -32,9 +32,11 @@ Primas development team is used by Primas browser extension and several other si
 Wormhole implements offline signing mechanism to protect its own private key. Other than that, no signature is needed in
 any cases for Wormhole users or applications connecting to Wormhole.
 
-The womrhole instance hosted by Primas development team is accessible at:
+A working instance of Wormhole can be found at:
 
-[https://api.wormhole.im](https://api.wormhole.im)
+[https://api.connect2.cc](https://api.connect2.cc)
+
+Which is used by the browser extension project called [Connect](https://www.connect2.cc)
 
 Check the [github wiki page](https://github.com/primasio/wormhole/wiki) for API documentation.
 
@@ -42,7 +44,7 @@ Check the [github wiki page](https://github.com/primasio/wormhole/wiki) for API 
 
 Wormhole isolates Primas Token, or PST, from its users. Users of Wormhole won't need to know anything about PST.
 Instead, an independent token, or point, WORM, is used in the system. How WORMs are used in the system, how WORMs are
-distributed to Wormhole users, Can WORMs be traded on an exchange, all depend on Wormhole's decision and **CAN BE**
+distributed to Wormhole users, can WORMs be traded on an exchange, all depend on Wormhole's decision and **CAN BE**
 changed at any time.
 
 Wormhole itself, however, needs to hold some amount of PSTs in its root account to use Primas API.
