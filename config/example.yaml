@@ -22,3 +22,6 @@ oauth:
   google:
     client_id:
     client_secret:
+
+admin:
+  key:

@@ -64,13 +64,10 @@ func NewRouter() *gin.Engine {
 
 		articleCtrl := new(v1.ArticleController)
 
-		articleGroup := v1g.Group("articles")
+		articleGroupAuthorized := v1g.Group("articles").Use(middlewares.AuthMiddleware())
 		{
-			articleGroup.Use(middlewares.AuthMiddleware())
-			{
-				articleGroup.GET("/:article_id", articleCtrl.Get)
-				articleGroup.POST("", articleCtrl.Publish)
-			}
+			articleGroupAuthorized.GET("/:article_id", articleCtrl.Get)
+			articleGroupAuthorized.POST("", articleCtrl.Publish)
 		}
 
 		// URL Content endpoints
@@ -79,30 +76,35 @@ func NewRouter() *gin.Engine {
 
 		urlContentGroup := v1g.Group("urls")
 		{
-			// URL Content Comments endpoints
-
-			urlContentCommentCtrl := new(v1.URLContentCommentController)
-			urlContentCommentGroup := urlContentGroup.Group("comments")
-			{
-				urlContentCommentGroup.GET("", urlContentCommentCtrl.List)
-
-				urlContentCommentGroup.Use(middlewares.AuthMiddleware())
-				{
-					urlContentCommentGroup.POST("", urlContentCommentCtrl.Create)
-					urlContentCommentGroup.DELETE("/:comment_id", urlContentCommentCtrl.Delete)
-				}
-			}
-
 			urlContentGroup.GET("/url", urlContentCtrl.Get)
 			urlContentGroup.GET("", urlContentCtrl.List)
-
-			urlContentGroup.Use(middlewares.AuthMiddleware())
-			{
-				urlContentGroup.POST("", urlContentCtrl.Create)
-				urlContentGroup.PUT("/url", urlContentCtrl.Vote)
-			}
 		}
 
+		urlContentGroupAuthorized := v1g.Group("urls").Use(middlewares.AuthMiddleware())
+		{
+			urlContentGroupAuthorized.POST("", urlContentCtrl.Create)
+			urlContentGroupAuthorized.PUT("/url", urlContentCtrl.Vote)
+		}
+
+		urlContentGroupAdmin := v1g.Group("urls").Use(middlewares.AdminAuthMiddleware())
+		{
+			urlContentGroupAdmin.POST("/url/approval", urlContentCtrl.Approve)
+		}
+
+		// URL Content Comments endpoints
+
+		urlContentCommentCtrl := new(v1.URLContentCommentController)
+
+		urlContentCommentGroup := urlContentGroup.Group("comments")
+		{
+			urlContentCommentGroup.GET("", urlContentCommentCtrl.List)
+		}
+
+		urlContentCommentGroupAuthorized := urlContentGroup.Group("comments").Use(middlewares.AuthMiddleware())
+		{
+			urlContentCommentGroupAuthorized.POST("", urlContentCommentCtrl.Create)
+			urlContentCommentGroupAuthorized.DELETE("/:comment_id", urlContentCommentCtrl.Delete)
+		}
 	}
 
 	return router

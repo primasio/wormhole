@@ -207,3 +207,32 @@ func (ctrl *URLContentController) Vote(c *gin.Context) {
 	tx.Commit()
 	Success(lockedURLContent, c)
 }
+
+func (ctrl *URLContentController) Approve(c *gin.Context) {
+	url := c.Query("url")
+
+	err, urlContent := models.GetURLContentByURL(url, db.GetDb(), false)
+
+	if err != nil {
+		ErrorServer(err, c)
+		return
+	}
+
+	if urlContent == nil {
+		ErrorNotFound(errors.New("url not found"), c)
+		return
+	}
+
+	if urlContent.IsActive {
+		Error("url is already active", c)
+		return
+	}
+
+	urlContent.IsActive = true
+
+	dbi := db.GetDb()
+
+	dbi.Save(urlContent)
+
+	Success(urlContent, c)
+}
