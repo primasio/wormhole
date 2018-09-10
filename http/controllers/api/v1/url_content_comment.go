@@ -106,7 +106,7 @@ func (ctrl *URLContentCommentController) Delete(c *gin.Context) {
 		return
 	}
 
-	sql := "SELECT id, total_comment FROM url_contents WHERE id = ?"
+	sql := "SELECT id, hash_key, total_comment FROM url_contents WHERE id = ?"
 
 	if db.GetDbType() != db.SQLITE {
 		sql = sql + " FOR UPDATE"

@@ -111,15 +111,34 @@ func TestURLContentCommentController_Delete(t *testing.T) {
 	err, urlContent := PrepareURLContent()
 	assert.Equal(t, err, nil)
 
-	err, comment := PrepareURLContentComment(urlContent)
-	assert.Equal(t, err, nil)
+	comments := make([]*models.URLContentComment, 10)
+
+	for i := 0; i < 10; i++ {
+		err, comment := PrepareURLContentComment(urlContent)
+		assert.Equal(t, err, nil)
+
+		comments[i] = comment
+	}
+
+	// Delete first comment
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("DELETE", "/v1/urls/comments/"+comment.UniqueID, nil)
+	req, _ := http.NewRequest("DELETE", "/v1/urls/comments/"+comments[0].UniqueID, nil)
 	req.Header.Add("Authorization", authToken)
 
 	router.ServeHTTP(w, req)
 
 	log.Println(w.Body.String())
 	assert.Equal(t, w.Code, 200)
+
+	// Delete second comment
+
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("DELETE", "/v1/urls/comments/"+comments[1].UniqueID, nil)
+	req2.Header.Add("Authorization", authToken)
+
+	router.ServeHTTP(w2, req2)
+
+	log.Println(w.Body.String())
+	assert.Equal(t, w2.Code, 200)
 }
