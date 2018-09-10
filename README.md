@@ -48,3 +48,64 @@ distributed to Wormhole users, can WORMs be traded on an exchange, all depend on
 changed at any time.
 
 Wormhole itself, however, needs to hold some amount of PSTs in its root account to use Primas API.
+
+### Development
+
+#### Deploy your own instance
+
+Wormhole is deployed using Docker. You can find the latest released docker image in Docker Hub.
+
+```bash
+$ sudo docker pull primasio/wormhole:latest
+```
+
+There's also a docker-compose.yml file provided in the release package to show how the docker image is used to start
+a Wormhole API server. In most cases, you can simply start the server using only one docker-compose command:
+
+```bash
+$ cd wormhole/release/package
+$ sudo docker-compose up
+```
+
+#### Build the release package
+
+After modification to the source, you need to rebuild the binary and then update the Docker image:
+
+**Rebuild and Test**
+
+There's a Makefile for convenient build and test of Womrhole project. To test the project, simply run:
+
+```bash
+$ make test
+```
+
+To build the release package run:
+
+```bash
+$ make
+```
+
+By default the static Linux x64 binary is built.
+
+After rebuild you can find the release package under the folder named "dist".
+
+**Update Docker image**
+
+You can find the required Dockerfile in the release package.
+To generate a new docker image:
+
+```bash
+$ cd wormhole/project/folder/dist
+$ sudo docker build -t primasio/wormhole .
+```
+
+You may need to change the target name according to your environment.
+
+### Contribution
+
+Pull request is always welcome.
+
+Join Primas developer community for discussions and instant help:
+
+[https://slack.primas.io](https://slack.primas.io)
+
