@@ -1,6 +1,6 @@
 # Makefile for wormhole distribution package
 
-all: dist
+all: test dist
 
 .PHONY: dist
 dist: deps build-linux-x64
