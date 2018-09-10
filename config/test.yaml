@@ -9,3 +9,6 @@ http:
 
 cache:
   type: memory
+
+admin:
+  key: test_key

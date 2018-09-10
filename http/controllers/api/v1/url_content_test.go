@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/magiconair/properties/assert"
+	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/http/token"
 	"github.com/primasio/wormhole/models"
@@ -246,6 +247,26 @@ func TestURLContentController_List(t *testing.T) {
 	assert.Equal(t, len(urlContentList2), 5)
 	assert.Equal(t, urlContentList2[0].CreatedAt, largestActiveCreatedAt)
 	assert.Equal(t, urlContentList2[0].IsActive, true)
+}
+
+func TestURLContentController_Approve(t *testing.T) {
+	PrepareAuthToken(t)
+
+	err, urlContent := PrepareURLContent()
+	assert.Equal(t, err, nil)
+
+	escaped := url.QueryEscape(urlContent.URL)
+
+	req, _ := http.NewRequest("POST", "/v1/urls/url/approval?url="+escaped, nil)
+	req.Header.Add("Authorization", config.GetConfig().GetString("admin.key"))
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	resp := w.Body.String()
+
+	log.Println(resp)
+	assert.Equal(t, w.Code, 200)
 }
 
 func getUrlContentListFromJsonString(jsonStr string, t *testing.T) []models.URLContent {

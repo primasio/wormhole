@@ -54,6 +54,10 @@ func PrepareURLContentComment(content *models.URLContent) (error, *models.URLCon
 
 	dbi.Create(&urlContentComment)
 
+	content.TotalComment++
+
+	dbi.Save(content)
+
 	return nil, urlContentComment
 }
 

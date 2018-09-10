@@ -1,9 +1,21 @@
 ---
+sudo: required
+
 language: go
 
 go:
   - "1.10.x"
   - "1.11.x"
 
+services:
+  - docker
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: bash scripts/docker_push_master.sh
+    on:
+      branch: master
