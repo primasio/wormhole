@@ -73,7 +73,7 @@ func TestURLContentCommentController_Create(t *testing.T) {
 	form.Set("url", urlContent.URL)
 	form.Set("content", "<p>The comment of a URL.</p>")
 
-	req, _ := http.NewRequest("POST", "/v1/urls/comments", strings.NewReader(form.Encode()))
+	req, _ := http.NewRequest("POST", "/v1/comments", strings.NewReader(form.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(form.Encode())))
 	req.Header.Add("Authorization", authToken)
@@ -87,7 +87,6 @@ func TestURLContentCommentController_Create(t *testing.T) {
 func TestURLContentCommentController_List(t *testing.T) {
 
 	ResetDB()
-	PrepareSystemUser()
 
 	err, urlContent := PrepareURLContent()
 	assert.Equal(t, err, nil)
@@ -100,7 +99,7 @@ func TestURLContentCommentController_List(t *testing.T) {
 	url := url.QueryEscape(urlContent.URL)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/urls/comments?url="+url, nil)
+	req, _ := http.NewRequest("GET", "/v1/comments?url="+url, nil)
 
 	router.ServeHTTP(w, req)
 
@@ -127,7 +126,7 @@ func TestURLContentCommentController_Delete(t *testing.T) {
 	// Delete first comment
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("DELETE", "/v1/urls/comments/"+comments[0].UniqueID, nil)
+	req, _ := http.NewRequest("DELETE", "/v1/comments/"+comments[0].UniqueID, nil)
 	req.Header.Add("Authorization", authToken)
 
 	router.ServeHTTP(w, req)
@@ -138,7 +137,7 @@ func TestURLContentCommentController_Delete(t *testing.T) {
 	// Delete second comment
 
 	w2 := httptest.NewRecorder()
-	req2, _ := http.NewRequest("DELETE", "/v1/urls/comments/"+comments[1].UniqueID, nil)
+	req2, _ := http.NewRequest("DELETE", "/v1/comments/"+comments[1].UniqueID, nil)
 	req2.Header.Add("Authorization", authToken)
 
 	router.ServeHTTP(w2, req2)

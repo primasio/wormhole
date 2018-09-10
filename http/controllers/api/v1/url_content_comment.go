@@ -40,6 +40,30 @@ func (ctrl *URLContentCommentController) Create(c *gin.Context) {
 	} else {
 		tx := db.GetDb().Begin()
 
+		// Check domain approved
+
+		err, domainName := models.ExtractDomainFromURL(form.URL)
+
+		if err != nil {
+			tx.Rollback()
+			ErrorServer(err, c)
+			return
+		}
+
+		err, domainExist := models.GetDomainByDomainName(domainName, tx, false)
+
+		if domainExist == nil {
+			tx.Rollback()
+			ErrorNotFound(errors.New("domain not found"), c)
+			return
+		}
+
+		if !domainExist.IsActive {
+			tx.Rollback()
+			ErrorNotFound(errors.New("domain not approved"), c)
+			return
+		}
+
 		// Check URL content
 		err, lockedUrlContent := models.GetURLContentByURL(form.URL, tx, true)
 
@@ -49,13 +73,31 @@ func (ctrl *URLContentCommentController) Create(c *gin.Context) {
 			return
 		}
 
+		userId, _ := c.Get(middlewares.AuthorizedUserId)
+
 		if lockedUrlContent == nil {
-			tx.Rollback()
-			ErrorNotFound(errors.New("url not found"), c)
-			return
+			// First time comment
+			// Create the url content
+
+			lockedUrlContent = &models.URLContent{}
+			lockedUrlContent.UserId = userId.(uint)
+			lockedUrlContent.URL = models.CleanURL(form.URL)
+			lockedUrlContent.HashKey = models.GetURLHashKey(lockedUrlContent.URL)
+
+			err = tx.Create(lockedUrlContent).Error
+
+		} else {
+			// Update comment count
+			lockedUrlContent.TotalComment++
+
+			err = tx.Save(&lockedUrlContent).Error
 		}
 
-		userId, _ := c.Get(middlewares.AuthorizedUserId)
+		if err != nil {
+			tx.Rollback()
+			ErrorServer(err, c)
+			return
+		}
 
 		// Create comment
 
@@ -71,15 +113,6 @@ func (ctrl *URLContentCommentController) Create(c *gin.Context) {
 		}
 
 		if err = tx.Create(&comment).Error; err != nil {
-			tx.Rollback()
-			ErrorServer(err, c)
-			return
-		}
-
-		// Update comment count
-		lockedUrlContent.TotalComment++
-
-		if err = tx.Save(&lockedUrlContent).Error; err != nil {
 			tx.Rollback()
 			ErrorServer(err, c)
 			return

@@ -26,16 +26,11 @@ import (
 
 type URLContent struct {
 	BaseModel
-	UserId   uint   `json:"-"`
-	URL      string `gorm:"type:text" json:"url"`
-	Title    string `gorm:"type:text" json:"title"`
-	Abstract string `gorm:"type:text" json:"abstract"`
-	Content  string `gorm:"type:longtext" json:"content"`
-	HashKey  string `gorm:"type:varchar(128);unique_index" json:"-"`
+	UserId  uint   `json:"-"`
+	URL     string `gorm:"type:text" json:"url"`
+	HashKey string `gorm:"type:varchar(128);unique_index" json:"-"`
 
-	IsActive     bool `gorm:"default:false" json:"is_active"`
-	Votes        uint `gorm:"default:1" json:"votes"`
-	TotalComment uint `gorm:"default:0" json:"total_comment"`
+	TotalComment uint `gorm:"default:1" json:"total_comment"`
 }
 
 func CleanURL(url string) string {
@@ -45,9 +40,7 @@ func CleanURL(url string) string {
 
 func GetURLHashKey(url string) string {
 
-	cleaned := CleanURL(url)
-
-	sumBytes := sha1.Sum([]byte(cleaned))
+	sumBytes := sha1.Sum([]byte(url))
 
 	return hex.EncodeToString(sumBytes[:])
 }
