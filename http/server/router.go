@@ -70,37 +70,46 @@ func NewRouter() *gin.Engine {
 			articleGroupAuthorized.POST("", articleCtrl.Publish)
 		}
 
+		// Domain endpoints
+
+		domainController := new(v1.DomainController)
+
+		domainGroup := v1g.Group("domains")
+		{
+			domainGroup.GET("", domainController.List)
+			domainGroup.GET("/domain", domainController.Get)
+		}
+
+		domainGroupAuthorized := v1g.Group("domains").Use(middlewares.AuthMiddleware())
+		{
+			domainGroupAuthorized.POST("", domainController.Create)
+			domainGroupAuthorized.PUT("/domain", domainController.Vote)
+		}
+
+		domainGroupAdmin := v1g.Group("domains").Use(middlewares.AdminAuthMiddleware())
+		{
+			domainGroupAdmin.POST("/domain/approval", domainController.Approve)
+		}
+
 		// URL Content endpoints
 
-		urlContentCtrl := new(v1.URLContentController)
+		urlContentController := new(v1.URLContentController)
 
 		urlContentGroup := v1g.Group("urls")
 		{
-			urlContentGroup.GET("/url", urlContentCtrl.Get)
-			urlContentGroup.GET("", urlContentCtrl.List)
-		}
-
-		urlContentGroupAuthorized := v1g.Group("urls").Use(middlewares.AuthMiddleware())
-		{
-			urlContentGroupAuthorized.POST("", urlContentCtrl.Create)
-			urlContentGroupAuthorized.PUT("/url", urlContentCtrl.Vote)
-		}
-
-		urlContentGroupAdmin := v1g.Group("urls").Use(middlewares.AdminAuthMiddleware())
-		{
-			urlContentGroupAdmin.POST("/url/approval", urlContentCtrl.Approve)
+			urlContentGroup.GET("/url", urlContentController.Get)
 		}
 
 		// URL Content Comments endpoints
 
 		urlContentCommentCtrl := new(v1.URLContentCommentController)
 
-		urlContentCommentGroup := urlContentGroup.Group("comments")
+		urlContentCommentGroup := v1g.Group("comments")
 		{
 			urlContentCommentGroup.GET("", urlContentCommentCtrl.List)
 		}
 
-		urlContentCommentGroupAuthorized := urlContentGroup.Group("comments").Use(middlewares.AuthMiddleware())
+		urlContentCommentGroupAuthorized := v1g.Group("comments").Use(middlewares.AuthMiddleware())
 		{
 			urlContentCommentGroupAuthorized.POST("", urlContentCommentCtrl.Create)
 			urlContentCommentGroupAuthorized.DELETE("/:comment_id", urlContentCommentCtrl.Delete)

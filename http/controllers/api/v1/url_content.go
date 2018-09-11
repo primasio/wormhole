@@ -20,219 +20,57 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/primasio/wormhole/db"
-	"github.com/primasio/wormhole/http/middlewares"
 	"github.com/primasio/wormhole/models"
-	"strconv"
 )
 
 type URLContentController struct{}
-
-type URLContentForm struct {
-	URL      string `form:"url" json:"url" binding:"required"`
-	Title    string `form:"title" json:"title" binding:"required"`
-	Content  string `form:"content" json:"content" binding:"required"`
-	Abstract string `form:"abstract" json:"abstract" binding:"required"`
-}
-
-func (ctrl *URLContentController) Create(c *gin.Context) {
-	var form URLContentForm
-
-	if err := c.ShouldBind(&form); err != nil {
-		Error(err.Error(), c)
-	} else {
-		dbi := db.GetDb()
-
-		// Check URL uniqueness
-		err, check := models.GetURLContentByURL(form.URL, dbi, false)
-
-		if err != nil {
-			ErrorServer(err, c)
-			return
-		}
-
-		if check != nil {
-			Error("URL exists", c)
-			return
-		}
-
-		// Save url to db
-		urlContent := &models.URLContent{}
-
-		urlContent.URL = models.CleanURL(form.URL)
-		urlContent.Title = form.Title
-		urlContent.Content = form.Content
-		urlContent.Abstract = form.Abstract
-		urlContent.HashKey = models.GetURLHashKey(form.URL)
-
-		userId, _ := c.Get(middlewares.AuthorizedUserId)
-		urlContent.UserId = userId.(uint)
-
-		dbi.Create(&urlContent)
-
-		Success(urlContent, c)
-	}
-}
-
-func (ctrl *URLContentController) List(c *gin.Context) {
-
-	urlType := c.Query("type")
-
-	pageSize := 20
-	page, err := strconv.Atoi(c.Query("page"))
-
-	if err != nil {
-		page = 0
-	}
-
-	offsetNum := page * pageSize
-
-	var urlList []models.URLContent
-
-	dbi := db.GetDb()
-	query := dbi.Select("id, url, title, abstract, votes, is_active, total_comment, created_at, updated_at")
-	query = query.Where("is_active = ?", urlType != "voting")
-	query = query.Order("created_at DESC").Offset(offsetNum).Limit(pageSize)
-
-	query.Find(&urlList)
-
-	Success(urlList, c)
-}
 
 func (ctrl *URLContentController) Get(c *gin.Context) {
 
 	url := c.Query("url")
 
-	err, urlContent := models.GetURLContentByURL(url, db.GetDb(), false)
-
-	if err != nil {
-		ErrorServer(err, c)
+	if url == "" {
+		Error("missing query param url", c)
 		return
 	}
 
-	if urlContent == nil {
-		ErrorNotFound(errors.New("url not found"), c)
-		return
-	}
-
-	Success(urlContent, c)
-}
-
-func (ctrl *URLContentController) Vote(c *gin.Context) {
-
-	url := c.Query("url")
-
-	err, urlContent := models.GetURLContentByURL(url, db.GetDb(), false)
-
-	if err != nil {
-		ErrorServer(err, c)
-		return
-	}
-
-	if urlContent == nil {
-		ErrorNotFound(errors.New("url not found"), c)
-		return
-	}
-
-	if urlContent.IsActive {
-		Error("url is already active", c)
-		return
-	}
-
-	userId, _ := c.Get(middlewares.AuthorizedUserId)
-	userIdNum := userId.(uint)
-
-	if urlContent.UserId == userId {
-		Error("user already voted", c)
-		return
-	}
-
-	// Update vote should be executed on a locked object
-
-	lockedURLContent := &models.URLContent{}
-
-	tx := db.GetDb().Begin()
-
-	// If SQLite is used, FOR UPDATE is not supported
-	// Then there is an error of concurrent votes count
-
-	sql := "SELECT * FROM url_contents WHERE id = ?"
-
-	if db.GetDbType() != db.SQLITE {
-		sql = sql + " FOR UPDATE"
-	}
-
-	if err := tx.Raw(sql, urlContent.ID).Scan(&lockedURLContent).Error; err != nil {
-		tx.Rollback()
-		ErrorServer(err, c)
-		return
-	}
-
-	if lockedURLContent.ID == 0 {
-		tx.Rollback()
-		ErrorServer(errors.New("error lock url_content"), c)
-		return
-	}
-
-	// Check user vote status
-	// this should be performed after the locking of url_content
-	// to avoid race condition of concurrent voting from the same user
-
-	vote := &models.URLContentVote{
-		UserId:       userIdNum,
-		URLContentID: lockedURLContent.ID,
-	}
-
-	tx.Where(&vote).First(&vote)
-
-	if vote.ID != 0 {
-		tx.Rollback()
-		Error("user already voted", c)
-		return
-	}
-
-	lockedURLContent.Votes++
-
-	if err := tx.Save(&lockedURLContent).Error; err != nil {
-		tx.Rollback()
-		ErrorServer(err, c)
-		return
-	}
-
-	if err := tx.Create(vote).Error; err != nil {
-		tx.Rollback()
-		ErrorServer(err, c)
-		return
-	}
-
-	tx.Commit()
-	Success(lockedURLContent, c)
-}
-
-func (ctrl *URLContentController) Approve(c *gin.Context) {
-	url := c.Query("url")
-
-	err, urlContent := models.GetURLContentByURL(url, db.GetDb(), false)
-
-	if err != nil {
-		ErrorServer(err, c)
-		return
-	}
-
-	if urlContent == nil {
-		ErrorNotFound(errors.New("url not found"), c)
-		return
-	}
-
-	if urlContent.IsActive {
-		Error("url is already active", c)
-		return
-	}
-
-	urlContent.IsActive = true
+	// Check whether the domain is approved.
 
 	dbi := db.GetDb()
 
-	dbi.Save(urlContent)
+	cleanedUrl := models.CleanURL(url)
+
+	err, domain := models.ExtractDomainFromURL(cleanedUrl)
+
+	if err != nil {
+		Error(err.Error(), c)
+		return
+	}
+
+	err, domainModel := models.GetDomainByDomainName(domain, dbi, false)
+
+	if err != nil {
+		ErrorServer(err, c)
+		return
+	}
+
+	if domainModel == nil || !domainModel.IsActive {
+		ErrorNotFound(errors.New("domain is not approved yet"), c)
+		return
+	}
+
+	err, urlContent := models.GetURLContentByURL(cleanedUrl, dbi, false)
+
+	if err != nil {
+		ErrorServer(err, c)
+		return
+	}
+
+	if urlContent == nil {
+		// url is not registered yet
+
+		urlContent = &models.URLContent{}
+	}
 
 	Success(urlContent, c)
 }

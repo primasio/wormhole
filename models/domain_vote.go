@@ -16,8 +16,8 @@
 
 package models
 
-type URLContentVote struct {
+type DomainVote struct {
 	BaseModel
-	UserId       uint
-	URLContentID uint
+	UserId   uint
+	DomainID uint
 }

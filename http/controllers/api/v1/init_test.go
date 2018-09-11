@@ -113,7 +113,8 @@ func ResetDB() {
 		"articles",
 		"url_contents",
 		"url_content_comments",
-		"url_content_votes",
+		"domain_votes",
+		"domains",
 	}
 
 	dbi := db.GetDb()
