@@ -8,4 +8,4 @@ services:
     volumes:
      - /primas/components/wormhole/config:/wormhole/config
      - /primas/components/wormhole/logs:/wormhole/logs
-    command: -log_dir="/wormhole/logs" -v=1
+    command: -log_dir="/wormhole/logs" -v=1 --migrate

@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
-package tests
+package migrations_test
 
 import (
 	"flag"
-	"github.com/primasio/wormhole/cache"
+	"github.com/magiconair/properties/assert"
 	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/db/migrations"
 	"log"
-	"math/rand"
 	"os"
-	"time"
+	"testing"
 )
 
-func InitTestEnv(configPath string) {
+func TestMigrate(t *testing.T) {
+
+	// Manually initialize test environment
+
 	environment := flag.String("e", "test", "")
 
 	flag.Parse()
 
 	// Init Config
-	config.Init(*environment, &configPath)
+	path := "../../config/"
+	err := config.Init(*environment, &path)
+	assert.Equal(t, err, nil)
 
 	// Init Database
 	if err := db.Init(); err != nil {
@@ -42,16 +46,6 @@ func InitTestEnv(configPath string) {
 		os.Exit(1)
 	}
 
-	// Init Cache
-	if err := cache.InitCache(); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-
-	if err := migrations.Migrate(); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-
-	rand.Seed(time.Now().UnixNano())
+	err = migrations.Migrate()
+	assert.Equal(t, err, nil)
 }
