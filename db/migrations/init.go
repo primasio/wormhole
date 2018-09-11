@@ -33,7 +33,7 @@ func Migrate() error {
 		TableName:      "migrations",
 		IDColumnName:   "id",
 		IDColumnSize:   128,
-		UseTransaction: true,
+		UseTransaction: db.GetDbType() != db.SQLITE,
 	}
 
 	m := gormigrate.New(dbi, options, mgs)
