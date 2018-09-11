@@ -30,6 +30,8 @@ import (
 
 func main() {
 
+	migrate := flag.Bool("migrate", false, "whether to run the database migration")
+
 	flag.Parse()
 
 	// Init Environment
@@ -69,8 +71,6 @@ func main() {
 
 	// In a large scale production level deployment
 	// we might want to run the migration separately
-
-	migrate := flag.Bool("migrate", false, "whether to run the database migration")
 
 	if *migrate {
 		if err := migrations.Migrate(); err != nil {
