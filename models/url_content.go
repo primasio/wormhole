@@ -26,7 +26,7 @@ import (
 
 type URLContent struct {
 	BaseModel
-	UserId  uint   `json:"-"`
+	UserID  uint   `json:"-"`
 	URL     string `gorm:"type:text" json:"url"`
 	HashKey string `gorm:"type:varchar(128);unique_index" json:"-"`
 

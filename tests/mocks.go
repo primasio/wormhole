@@ -43,7 +43,7 @@ func CreateTestArticle(user *models.User) (*models.Article, error) {
 
 	randStr := util.RandString(5)
 
-	article.UserId = user.ID
+	article.UserID = user.ID
 
 	article.Title = "Test Article " + randStr
 	article.Content = "<p>This is a test article " + randStr + "</p>"

@@ -35,7 +35,7 @@ func (ctrl *ArticleController) Publish(c *gin.Context) {
 
 		userId, _ := c.Get(middlewares.AuthorizedUserId)
 
-		article.UserId = userId.(uint)
+		article.UserID = userId.(uint)
 
 		dbi.Create(&article)
 

@@ -26,11 +26,11 @@ type URLContentComment struct {
 	BaseModel
 
 	UniqueID     string `gorm:"type:varchar(128);unique_index" json:"id"`
-	UserId       uint   `json:"-"`
+	UserID       uint   `json:"-"`
 	URLContentId uint   `json:"-"`
 	Content      string `gorm:"type:longtext" json:"content"`
 
-	User User `gorm:"save_associations:false" sql:"-" json:"user"`
+	User User `gorm:"save_associations:false" json:"user"`
 
 	IsDeleted bool `gorm:"default:false" json:"is_deleted"`
 }

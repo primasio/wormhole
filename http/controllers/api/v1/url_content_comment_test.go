@@ -41,7 +41,7 @@ func PrepareURLContentComment(content *models.URLContent) (error, *models.URLCon
 	randStr := util.RandString(10)
 
 	urlContentComment := &models.URLContentComment{
-		UserId:       systemUser.ID,
+		UserID:       systemUser.ID,
 		Content:      "Comment " + randStr,
 		URLContentId: content.ID,
 	}

@@ -18,6 +18,6 @@ package models
 
 type DomainVote struct {
 	BaseModel
-	UserId   uint
+	UserID   uint
 	DomainID uint
 }

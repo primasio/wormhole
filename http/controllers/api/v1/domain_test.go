@@ -45,7 +45,7 @@ func PrepareDomain() (error, *models.Domain) {
 
 	domainModel := &models.Domain{
 		Domain: "primas" + randStr + ".io",
-		UserId: systemUser.ID,
+		UserID: systemUser.ID,
 	}
 
 	domainModel.HashKey = models.GetDomainHashKey(domainModel.Domain)

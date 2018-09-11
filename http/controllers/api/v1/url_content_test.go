@@ -42,7 +42,7 @@ func PrepareURLContent() (error, *models.URLContent) {
 
 	urlContent := &models.URLContent{
 		URL:    "https://" + domain.Domain + "/12345" + randStr,
-		UserId: systemUser.ID,
+		UserID: systemUser.ID,
 	}
 
 	urlContent.HashKey = models.GetURLHashKey(urlContent.URL)
