@@ -96,10 +96,10 @@ func TestURLContentCommentController_List(t *testing.T) {
 		assert.Equal(t, err, nil)
 	}
 
-	url := url.QueryEscape(urlContent.URL)
+	urlEscaped := url.QueryEscape(urlContent.URL)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/comments?url="+url, nil)
+	req, _ := http.NewRequest("GET", "/v1/comments?url="+urlEscaped, nil)
 
 	router.ServeHTTP(w, req)
 
