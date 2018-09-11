@@ -19,7 +19,7 @@ package models
 type Article struct {
 	BaseModel
 
-	UserId   uint   `gorm:"index" json:"-"`
+	UserID   uint   `gorm:"index" json:"-"`
 	Title    string `gorm:"type:text" form:"title" json:"title" binding:"required"`
 	Abstract string `gorm:"type:text" json:"abstract"`
 	Content  string `gorm:"type:longtext" form:"content" json:"content" binding:"required"`

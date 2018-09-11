@@ -63,7 +63,7 @@ func (ctrl *DomainController) Create(c *gin.Context) {
 		domainModel.HashKey = models.GetDomainHashKey(cleanedDomain)
 
 		userId, _ := c.Get(middlewares.AuthorizedUserId)
-		domainModel.UserId = userId.(uint)
+		domainModel.UserID = userId.(uint)
 
 		dbi.Create(&domainModel)
 
@@ -110,7 +110,7 @@ func (ctrl *DomainController) List(c *gin.Context) {
 
 	offsetNum := page * pageSize
 
-	var domainList []models.Domain
+	domainList := make([]models.Domain, 0)
 
 	dbi := db.GetDb()
 	query := dbi.Where("is_active = ?", urlType != "voting")
@@ -152,7 +152,7 @@ func (ctrl *DomainController) Vote(c *gin.Context) {
 	userId, _ := c.Get(middlewares.AuthorizedUserId)
 	userIdNum := userId.(uint)
 
-	if domainModel.UserId == userIdNum {
+	if domainModel.UserID == userIdNum {
 		Error("user already voted", c)
 		return
 	}
@@ -185,7 +185,7 @@ func (ctrl *DomainController) Vote(c *gin.Context) {
 	// to avoid race condition of concurrent voting from the same user
 
 	vote := &models.DomainVote{
-		UserId:   userIdNum,
+		UserID:   userIdNum,
 		DomainID: lockedDomain.ID,
 	}
 

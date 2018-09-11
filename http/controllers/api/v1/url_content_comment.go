@@ -86,7 +86,7 @@ func (ctrl *URLContentCommentController) Create(c *gin.Context) {
 			// Create the url content
 
 			lockedUrlContent = &models.URLContent{}
-			lockedUrlContent.UserId = userId.(uint)
+			lockedUrlContent.UserID = userId.(uint)
 			lockedUrlContent.URL = models.CleanURL(form.URL)
 			lockedUrlContent.HashKey = models.GetURLHashKey(lockedUrlContent.URL)
 
@@ -108,7 +108,7 @@ func (ctrl *URLContentCommentController) Create(c *gin.Context) {
 		// Create comment
 
 		comment := models.URLContentComment{}
-		comment.UserId = userId.(uint)
+		comment.UserID = userId.(uint)
 		comment.URLContentId = lockedUrlContent.ID
 		comment.Content = form.Content
 
@@ -216,11 +216,11 @@ func (ctrl *URLContentCommentController) List(c *gin.Context) {
 		return
 	} else {
 
-		var commentList []models.URLContentComment
+		commentList := make([]models.URLContentComment, 0)
 
 		if urlContent != nil {
 			query := dbi.Where("url_content_id = ? AND is_deleted = 0", urlContent.ID)
-			query.Order("created_at DESC").Offset(offsetNum).Limit(pageSize).Find(&commentList)
+			query.Order("created_at DESC").Offset(offsetNum).Limit(pageSize).Preload("User").Find(&commentList)
 		}
 
 		Success(commentList, c)

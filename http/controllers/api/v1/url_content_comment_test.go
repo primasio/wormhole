@@ -41,7 +41,7 @@ func PrepareURLContentComment(content *models.URLContent) (error, *models.URLCon
 	randStr := util.RandString(10)
 
 	urlContentComment := &models.URLContentComment{
-		UserId:       systemUser.ID,
+		UserID:       systemUser.ID,
 		Content:      "Comment " + randStr,
 		URLContentId: content.ID,
 	}
@@ -105,6 +105,18 @@ func TestURLContentCommentController_List(t *testing.T) {
 
 	log.Println(w.Body.String())
 	assert.Equal(t, w.Code, 200)
+
+	// Test list empty url
+
+	urlNull := url.QueryEscape("http://not.exist.com/a/web/page.html")
+
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("GET", "/v1/comments?url="+urlNull, nil)
+
+	router.ServeHTTP(w2, req2)
+
+	log.Println(w2.Body.String())
+	assert.Equal(t, w2.Code, 200)
 }
 
 func TestURLContentCommentController_Delete(t *testing.T) {

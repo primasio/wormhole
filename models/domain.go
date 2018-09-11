@@ -27,7 +27,7 @@ import (
 
 type Domain struct {
 	BaseModel
-	UserId  uint   `json:"-"`
+	UserID  uint   `json:"-"`
 	Domain  string `gorm:"type:text" json:"domain"`
 	Title   string `gorm:"type:text" json:"title"`
 	HashKey string `gorm:"type:varchar(128);unique_index" json:"-"`

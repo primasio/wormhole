@@ -39,7 +39,7 @@ func Migration20180911() []*gormigrate.Migration {
 				type Article struct {
 					BaseModel
 
-					UserId   uint   `gorm:"index" json:"-"`
+					UserID   uint   `gorm:"index" json:"-"`
 					Title    string `gorm:"type:text" form:"title" json:"title" binding:"required"`
 					Abstract string `gorm:"type:text" json:"abstract"`
 					Content  string `gorm:"type:longtext" form:"content" json:"content" binding:"required"`
@@ -51,7 +51,7 @@ func Migration20180911() []*gormigrate.Migration {
 
 				type Domain struct {
 					BaseModel
-					UserId  uint   `json:"-"`
+					UserID  uint   `json:"-"`
 					Domain  string `gorm:"type:text" json:"domain"`
 					Title   string `gorm:"type:text" json:"title"`
 					HashKey string `gorm:"type:varchar(128);unique_index" json:"-"`
@@ -62,13 +62,13 @@ func Migration20180911() []*gormigrate.Migration {
 
 				type DomainVote struct {
 					BaseModel
-					UserId   uint
+					UserID   uint
 					DomainID uint
 				}
 
 				type URLContent struct {
 					BaseModel
-					UserId  uint   `json:"-"`
+					UserID  uint   `json:"-"`
 					URL     string `gorm:"type:text" json:"url"`
 					HashKey string `gorm:"type:varchar(128);unique_index" json:"-"`
 
@@ -79,7 +79,7 @@ func Migration20180911() []*gormigrate.Migration {
 					BaseModel
 
 					UniqueID     string `gorm:"type:varchar(128);unique_index" json:"id"`
-					UserId       uint   `json:"-"`
+					UserID       uint   `json:"-"`
 					URLContentId uint   `json:"-"`
 					Content      string `gorm:"type:longtext" json:"content"`
 
