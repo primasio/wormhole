@@ -14,18 +14,37 @@
  * limitations under the License.
  */
 
-package models
+package migrations_test
 
-import "github.com/primasio/wormhole/db"
+import (
+	"flag"
+	"github.com/magiconair/properties/assert"
+	"github.com/primasio/wormhole/config"
+	"github.com/primasio/wormhole/db"
+	"github.com/primasio/wormhole/db/migrations"
+	"log"
+	"os"
+	"testing"
+)
 
-func AutoMigrateModels() {
-	dbi := db.GetDb()
+func TestMigrate(t *testing.T) {
 
-	dbi.AutoMigrate(&User{})
-	dbi.AutoMigrate(&UserOAuth{})
-	dbi.AutoMigrate(&Article{})
-	dbi.AutoMigrate(&Domain{})
-	dbi.AutoMigrate(&URLContent{})
-	dbi.AutoMigrate(&DomainVote{})
-	dbi.AutoMigrate(&URLContentComment{})
+	// Manually initialize test environment
+
+	environment := flag.String("e", "test", "")
+
+	flag.Parse()
+
+	// Init Config
+	path := "../../config/"
+	config.Init(*environment, &path)
+
+	// Init Database
+	if err := db.Init(); err != nil {
+		log.Println("Database:", err)
+		os.Exit(1)
+	}
+
+	err := migrations.Migrate()
+	assert.Equal(t, err, nil)
 }

@@ -21,7 +21,7 @@ import (
 	"github.com/primasio/wormhole/cache"
 	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
-	"github.com/primasio/wormhole/models"
+	"github.com/primasio/wormhole/db/migrations"
 	"log"
 	"math/rand"
 	"os"
@@ -48,7 +48,7 @@ func InitTestEnv(configPath string) {
 		os.Exit(1)
 	}
 
-	models.AutoMigrateModels()
+	migrations.Migrate()
 
 	rand.Seed(time.Now().UnixNano())
 }

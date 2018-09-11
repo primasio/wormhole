@@ -23,8 +23,8 @@ import (
 	"github.com/primasio/wormhole/cache"
 	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
+	"github.com/primasio/wormhole/db/migrations"
 	"github.com/primasio/wormhole/http/server"
-	"github.com/primasio/wormhole/models"
 	"os"
 )
 
@@ -65,8 +65,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	if env == "development" {
-		models.AutoMigrateModels()
+	// Run database migration
+
+	// In a large scale production level deployment
+	// we might want to run the migration separately
+
+	migrate := flag.Bool("migrate", false, "whether to run the database migration")
+
+	if *migrate {
+		migrations.Migrate()
 	}
 
 	// Init Cache
