@@ -29,7 +29,14 @@ func Migrate() error {
 
 	dbi := db.GetDb()
 
-	m := gormigrate.New(dbi, gormigrate.DefaultOptions, mgs)
+	options := &gormigrate.Options{
+		TableName:      "migrations",
+		IDColumnName:   "id",
+		IDColumnSize:   128,
+		UseTransaction: true,
+	}
+
+	m := gormigrate.New(dbi, options, mgs)
 
 	if err := m.Migrate(); err != nil {
 		glog.Info("Migration failed")
