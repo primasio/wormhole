@@ -37,7 +37,8 @@ func TestMigrate(t *testing.T) {
 
 	// Init Config
 	path := "../../config/"
-	config.Init(*environment, &path)
+	err := config.Init(*environment, &path)
+	assert.Equal(t, err, nil)
 
 	// Init Database
 	if err := db.Init(); err != nil {
@@ -45,6 +46,6 @@ func TestMigrate(t *testing.T) {
 		os.Exit(1)
 	}
 
-	err := migrations.Migrate()
+	err = migrations.Migrate()
 	assert.Equal(t, err, nil)
 }

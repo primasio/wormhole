@@ -44,11 +44,14 @@ func InitTestEnv(configPath string) {
 
 	// Init Cache
 	if err := cache.InitCache(); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 
-	migrations.Migrate()
+	if err := migrations.Migrate(); err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
 
 	rand.Seed(time.Now().UnixNano())
 }

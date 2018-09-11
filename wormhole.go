@@ -73,7 +73,10 @@ func main() {
 	migrate := flag.Bool("migrate", false, "whether to run the database migration")
 
 	if *migrate {
-		migrations.Migrate()
+		if err := migrations.Migrate(); err != nil {
+			glog.Error(err)
+			os.Exit(1)
+		}
 	}
 
 	// Init Cache
