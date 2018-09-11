@@ -110,7 +110,7 @@ func (ctrl *DomainController) List(c *gin.Context) {
 
 	offsetNum := page * pageSize
 
-	var domainList []models.Domain
+	domainList := make([]models.Domain, 0)
 
 	dbi := db.GetDb()
 	query := dbi.Where("is_active = ?", urlType != "voting")

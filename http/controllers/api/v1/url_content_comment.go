@@ -216,7 +216,7 @@ func (ctrl *URLContentCommentController) List(c *gin.Context) {
 		return
 	} else {
 
-		var commentList []models.URLContentComment
+		commentList := make([]models.URLContentComment, 0)
 
 		if urlContent != nil {
 			query := dbi.Where("url_content_id = ? AND is_deleted = 0", urlContent.ID)
