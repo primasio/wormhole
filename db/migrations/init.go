@@ -79,7 +79,7 @@ func initialTables() []*gormigrate.Migration {
 					BaseModel
 					UserID     uint   `gorm:"index"`
 					VendorType uint   `gorm:"index"`
-					VendorID   string `gorm:"index"`
+					VendorID   string `gorm:"type:varchar(128);index"`
 				}
 
 				if err := tx.AutoMigrate(&User{}).Error; err != nil {
