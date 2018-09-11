@@ -52,6 +52,12 @@ func (ctrl *URLContentCommentController) Create(c *gin.Context) {
 
 		err, domainExist := models.GetDomainByDomainName(domainName, tx, false)
 
+		if err != nil {
+			tx.Rollback()
+			Error(err.Error(), c)
+			return
+		}
+
 		if domainExist == nil {
 			tx.Rollback()
 			ErrorNotFound(errors.New("domain not found"), c)
