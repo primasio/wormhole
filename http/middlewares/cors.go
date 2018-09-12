@@ -84,13 +84,19 @@ func (c CorsConfig) Validate() error {
 	if !c.AllowAllOrigins && c.AllowOriginFunc == nil && len(c.AllowOrigins) == 0 {
 		return errors.New("conflict settings: all origins disabled")
 	}
+
+	return nil
+}
+
+func (c CorsConfig) ContainsStar() bool {
+
 	for _, origin := range c.AllowOrigins {
 		if origin == "*" {
-			c.AllowAllOrigins = true
-			break
+			return true
 		}
 	}
-	return nil
+
+	return false
 }
 
 // DefaultConfig returns a generic default configuration mapped to localhost.
@@ -132,6 +138,11 @@ func newCors(config CorsConfig) *cors {
 	if err := config.Validate(); err != nil {
 		panic(err.Error())
 	}
+
+	if config.ContainsStar() {
+		config.AllowAllOrigins = true
+	}
+
 	return &cors{
 		allowOriginFunc:  config.AllowOriginFunc,
 		allowAllOrigins:  config.AllowAllOrigins,
