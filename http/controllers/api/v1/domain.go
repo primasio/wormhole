@@ -218,6 +218,11 @@ func (ctrl *DomainController) Vote(c *gin.Context) {
 func (ctrl *DomainController) Approve(c *gin.Context) {
 	domain := c.Query("domain")
 
+	if domain == "" {
+		Error("missing query param domain", c)
+		return
+	}
+
 	err, domainModel := models.GetDomainByDomainName(domain, db.GetDb(), false)
 
 	if err != nil {

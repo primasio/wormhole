@@ -25,3 +25,10 @@ oauth:
 
 admin:
   key:
+
+cors:
+  origins:
+  methods:
+  allowed_headers:
+  exposed_headers:
+  allow_credentials: true
