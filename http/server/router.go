@@ -17,7 +17,6 @@
 package server
 
 import (
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/http/controllers/api/v1"
@@ -37,7 +36,7 @@ func NewRouter() *gin.Engine {
 	// CORS config
 	c := config.GetConfig()
 
-	router.Use(cors.New(cors.Config{
+	router.Use(middlewares.NewCors(middlewares.CorsConfig{
 		AllowOrigins:     c.GetStringSlice("cors.origins"),
 		AllowMethods:     c.GetStringSlice("cors.methods"),
 		AllowHeaders:     c.GetStringSlice("cors.allowed_headers"),
