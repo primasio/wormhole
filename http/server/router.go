@@ -17,7 +17,9 @@
 package server
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/http/controllers/api/v1"
 	"github.com/primasio/wormhole/http/middlewares"
 	"github.com/szuecs/gin-glog"
@@ -31,7 +33,17 @@ func NewRouter() *gin.Engine {
 	router := gin.New()
 	router.Use(ginglog.Logger(3 * time.Second))
 	router.Use(gin.Recovery())
-	router.Use(SetResponseHeader())
+
+	// CORS config
+	c := config.GetConfig()
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     c.GetStringSlice("cors.origins"),
+		AllowMethods:     c.GetStringSlice("cors.methods"),
+		AllowHeaders:     c.GetStringSlice("cors.allowed_headers"),
+		ExposeHeaders:    c.GetStringSlice("cors.exposed_headers"),
+		AllowCredentials: c.GetBool("cors.allow_credentials"),
+	}))
 
 	v1g := router.Group("v1")
 	{
