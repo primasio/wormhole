@@ -22,5 +22,7 @@ cors:
     - PUT
     - DELETE
   allowed_headers:
+    - "Authorization"
+    - "Origin"
   exposed_headers:
   allow_credentials: true
