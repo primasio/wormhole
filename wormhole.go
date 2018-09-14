@@ -43,10 +43,10 @@ func main() {
 	env := os.Getenv("APP_ENV")
 
 	if env == "" {
-		env = "development"
+		env = config.AppEnvDevelopment
 	}
 
-	if env == "production" {
+	if env == config.AppEnvProduction {
 		gin.SetMode(gin.ReleaseMode)
 	}
 

@@ -40,3 +40,6 @@ cors:
    - "Content-Type"
    - "Content-Length"
   allow_credentials: true
+
+recaptcha:
+  secret:

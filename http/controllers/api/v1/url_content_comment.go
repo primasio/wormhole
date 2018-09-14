@@ -19,7 +19,9 @@ package v1
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
+	"github.com/primasio/wormhole/http/captcha"
 	"github.com/primasio/wormhole/http/middlewares"
 	"github.com/primasio/wormhole/models"
 	"strconv"
@@ -38,17 +40,17 @@ func (ctrl *URLContentCommentController) Create(c *gin.Context) {
 	if err := c.ShouldBind(&form); err != nil {
 		Error(err.Error(), c)
 	} else {
-		tx := db.GetDb().Begin()
 
 		// Check domain approved
 
 		err, domainName := models.ExtractDomainFromURL(form.URL)
 
 		if err != nil {
-			tx.Rollback()
 			ErrorServer(err, c)
 			return
 		}
+
+		tx := db.GetDb().Begin()
 
 		err, domainExist := models.GetDomainByDomainName(domainName, tx, false)
 
@@ -132,6 +134,35 @@ func (ctrl *URLContentCommentController) Create(c *gin.Context) {
 func (ctrl *URLContentCommentController) Delete(c *gin.Context) {
 
 	commentId := c.Param("comment_id")
+
+	if commentId == "" {
+		Error("missing comment id", c)
+		return
+	}
+
+	if config.GetAppEnvironment() == config.AppEnvProduction {
+
+		// Check captcha
+
+		token := c.Query("token")
+
+		if token == "" {
+			Error("missing query param token", c)
+			return
+		}
+
+		err, passed := captcha.VerifyRecaptchaToken(token)
+
+		if err != nil {
+			Error(err.Error(), c)
+			return
+		}
+
+		if !passed {
+			Error("captcha verification failed", c)
+			return
+		}
+	}
 
 	comment := &models.URLContentComment{}
 	comment.UniqueID = commentId
