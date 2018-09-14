@@ -65,7 +65,8 @@ func HandleGoogleAuthCallback(code string) (err error, userId uint) {
 
 	// 1. Use code to get Google access token
 
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancelFn1 := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancelFn1()
 
 	token, e := googleConfig.Exchange(ctx, code)
 
@@ -75,7 +76,8 @@ func HandleGoogleAuthCallback(code string) (err error, userId uint) {
 
 	// 2. Use access token to get user info
 
-	ctx, _ = context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancelFn2 := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancelFn2()
 
 	url := "https://www.googleapis.com/oauth2/v2/userinfo"
 	client := googleConfig.Client(ctx, token)

@@ -45,7 +45,8 @@ func VerifyRecaptchaToken(token string) (error, bool) {
 
 	req, _ := http.NewRequest("POST", endpoint, strings.NewReader(form.Encode()))
 
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancelFn := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancelFn()
 
 	resp, err := ctxhttp.Do(ctx, nil, req)
 
