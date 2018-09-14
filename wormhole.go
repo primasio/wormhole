@@ -25,10 +25,15 @@ import (
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/db/migrations"
 	"github.com/primasio/wormhole/http/server"
+	"math/rand"
 	"os"
+	"time"
 )
 
 func main() {
+
+	// Init random seed
+	rand.Seed(time.Now().UnixNano())
 
 	migrate := flag.Bool("migrate", false, "whether to run the database migration")
 

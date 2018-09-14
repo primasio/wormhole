@@ -28,7 +28,15 @@ admin:
 
 cors:
   origins:
+   - "*"
   methods:
+   - "GET"
+   - "POST"
+   - "PUT"
+   - "DELETE"
   allowed_headers:
-  exposed_headers:
+   - "Authorization"
+   - "Origin"
+   - "Content-Type"
+   - "Content-Length"
   allow_credentials: true
