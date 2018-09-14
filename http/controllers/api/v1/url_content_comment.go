@@ -19,6 +19,7 @@ package v1
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/http/captcha"
 	"github.com/primasio/wormhole/http/middlewares"
@@ -139,25 +140,28 @@ func (ctrl *URLContentCommentController) Delete(c *gin.Context) {
 		return
 	}
 
-	// Check captcha
+	if config.GetAppEnvironment() == config.AppEnvProduction {
 
-	token := c.Query("token")
+		// Check captcha
 
-	if token == "" {
-		Error("missing query param token", c)
-		return
-	}
+		token := c.Query("token")
 
-	err, passed := captcha.VerifyRecaptchaToken(token)
+		if token == "" {
+			Error("missing query param token", c)
+			return
+		}
 
-	if err != nil {
-		Error(err.Error(), c)
-		return
-	}
+		err, passed := captcha.VerifyRecaptchaToken(token)
 
-	if !passed {
-		Error("captcha verification failed", c)
-		return
+		if err != nil {
+			Error(err.Error(), c)
+			return
+		}
+
+		if !passed {
+			Error("captcha verification failed", c)
+			return
+		}
 	}
 
 	comment := &models.URLContentComment{}

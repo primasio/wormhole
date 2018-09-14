@@ -23,9 +23,20 @@ import (
 
 var config *viper.Viper
 
+const AppEnvProduction = "production"
+const AppEnvDevelopment = "development"
+const AppEnvTest = "test"
+
+var appEnvironment string
+
 // Init is an exported method that takes the environment starts the viper
 // (external lib) and returns the configuration struct.
 func Init(env string, configPath *string) error {
+
+	if env != AppEnvDevelopment && env != AppEnvTest && env != AppEnvProduction {
+		return errors.New("unrecognized application environment")
+	}
+
 	var err error
 	v := viper.New()
 	v.SetConfigType("yaml")
@@ -43,9 +54,15 @@ func Init(env string, configPath *string) error {
 	}
 	config = v
 
+	appEnvironment = env
+
 	return nil
 }
 
 func GetConfig() *viper.Viper {
 	return config
+}
+
+func GetAppEnvironment() string {
+	return appEnvironment
 }

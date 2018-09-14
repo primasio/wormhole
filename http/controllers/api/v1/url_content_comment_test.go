@@ -138,7 +138,7 @@ func TestURLContentCommentController_Delete(t *testing.T) {
 	// Delete first comment
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("DELETE", "/v1/comments/"+comments[0].UniqueID, nil)
+	req, _ := http.NewRequest("DELETE", "/v1/comments/"+comments[0].UniqueID+"?token=TokenNotNeededForTest", nil)
 	req.Header.Add("Authorization", authToken)
 
 	router.ServeHTTP(w, req)
