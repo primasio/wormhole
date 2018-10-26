@@ -20,6 +20,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"errors"
+
 	"github.com/jinzhu/gorm"
 	"github.com/primasio/wormhole/db"
 )
@@ -43,6 +44,12 @@ func GetURLHashKey(url string) string {
 	sumBytes := sha1.Sum([]byte(url))
 
 	return hex.EncodeToString(sumBytes[:])
+}
+
+func GetURLContentCount(dbi *gorm.DB) (uint, error) {
+	count := 0
+	err := dbi.Model(&URLContent{}).Select("id").Count(&count).Error
+	return uint(count), err
 }
 
 func GetURLContentByURL(url string, dbi *gorm.DB, forUpdate bool) (error, *URLContent) {
