@@ -104,7 +104,7 @@ func (ctrl *URLContentController) List(c *gin.Context) {
 	page, pageSize := util.PurePageArgs(args.Page, args.PageSize)
 
 	if !util.CanPaginate(page, pageSize, count) {
-		Success(util.EmptyPagination(page, pageSize, count), c)
+		Success(util.EmptyPagination(page, pageSize), c)
 		return
 	}
 

@@ -52,10 +52,15 @@ func Paginate(page, pageSize, count uint, data interface{}) *Pagination {
 }
 
 func CanPaginate(page, pageSize, count uint) bool {
+	if page == 0 {
+		page = 1
+	}
+
 	from := (page-1)*pageSize + 1
 	if count == 0 || from > count {
 		return false
 	}
+
 	return true
 }
 
@@ -74,6 +79,6 @@ func PurePageArgs(page uint, pageSize uint) (uint, uint) {
 	return page, pageSize
 }
 
-func EmptyPagination(page, pageSize, count uint) *Pagination {
-	return Paginate(page, pageSize, count, make([]interface{}, 0))
+func EmptyPagination(page, pageSize uint) *Pagination {
+	return Paginate(page, pageSize, 0, make([]interface{}, 0))
 }
