@@ -17,12 +17,13 @@
 package server
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/http/controllers/api/v1"
 	"github.com/primasio/wormhole/http/middlewares"
 	"github.com/szuecs/gin-glog"
-	"time"
 )
 
 func NewRouter() *gin.Engine {
@@ -108,6 +109,7 @@ func NewRouter() *gin.Engine {
 
 		urlContentGroup := v1g.Group("urls")
 		{
+			urlContentGroup.GET("", urlContentController.List)
 			urlContentGroup.GET("/url", urlContentController.Get)
 		}
 

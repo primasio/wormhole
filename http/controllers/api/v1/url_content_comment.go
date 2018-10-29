@@ -18,13 +18,14 @@ package v1
 
 import (
 	"errors"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/primasio/wormhole/config"
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/http/captcha"
 	"github.com/primasio/wormhole/http/middlewares"
 	"github.com/primasio/wormhole/models"
-	"strconv"
 )
 
 type URLContentCommentController struct{}
@@ -41,9 +42,7 @@ func (ctrl *URLContentCommentController) Create(c *gin.Context) {
 		Error(err.Error(), c)
 	} else {
 
-		// Check domain approved
-
-		err, domainName := models.ExtractDomainFromURL(form.URL)
+		err, _ := models.ExtractDomainFromURL(form.URL)
 
 		if err != nil {
 			ErrorServer(err, c)
@@ -51,26 +50,6 @@ func (ctrl *URLContentCommentController) Create(c *gin.Context) {
 		}
 
 		tx := db.GetDb().Begin()
-
-		err, domainExist := models.GetDomainByDomainName(domainName, tx, false)
-
-		if err != nil {
-			tx.Rollback()
-			Error(err.Error(), c)
-			return
-		}
-
-		if domainExist == nil {
-			tx.Rollback()
-			ErrorNotFound(errors.New("domain not found"), c)
-			return
-		}
-
-		if !domainExist.IsActive {
-			tx.Rollback()
-			ErrorNotFound(errors.New("domain not approved"), c)
-			return
-		}
 
 		// Check URL content
 		err, lockedUrlContent := models.GetURLContentByURL(form.URL, tx, true)
