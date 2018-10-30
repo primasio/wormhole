@@ -17,15 +17,16 @@
 package v1_test
 
 import (
-	"github.com/magiconair/properties/assert"
-	"github.com/primasio/wormhole/db"
-	"github.com/primasio/wormhole/models"
-	"github.com/primasio/wormhole/util"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
+
+	"github.com/magiconair/properties/assert"
+	"github.com/primasio/wormhole/db"
+	"github.com/primasio/wormhole/models"
+	"github.com/primasio/wormhole/util"
 )
 
 func PrepareURLContent() (error, *models.URLContent) {
@@ -70,25 +71,4 @@ func TestURLContentController_Get(t *testing.T) {
 
 	log.Println(w.Body.String())
 	assert.Equal(t, w.Code, 200)
-
-	// Reset the approval status of the domain
-
-	err, domain := models.ExtractDomainFromURL(urlContent.URL)
-	assert.Equal(t, err, nil)
-
-	err, domainModel := models.GetDomainByDomainName(domain, db.GetDb(), false)
-	assert.Equal(t, err, nil)
-
-	domainModel.IsActive = false
-
-	db.GetDb().Save(&domainModel)
-
-	// Get the url content again
-	req2, _ := http.NewRequest("GET", "/v1/urls/url?url="+escaped, nil)
-
-	w2 := httptest.NewRecorder()
-	router.ServeHTTP(w2, req2)
-
-	log.Println(w2.Body.String())
-	assert.Equal(t, w2.Code, 404)
 }

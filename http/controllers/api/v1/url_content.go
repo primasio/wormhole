@@ -17,8 +17,6 @@
 package v1
 
 import (
-	"errors"
-
 	"github.com/primasio/wormhole/util"
 
 	"github.com/gin-gonic/gin"
@@ -48,22 +46,10 @@ func (ctrl *URLContentController) Get(c *gin.Context) {
 
 	cleanedUrl := models.CleanURL(url)
 
-	err, domain := models.ExtractDomainFromURL(cleanedUrl)
+	err, _ := models.ExtractDomainFromURL(cleanedUrl)
 
 	if err != nil {
 		Error(err.Error(), c)
-		return
-	}
-
-	err, domainModel := models.GetDomainByDomainName(domain, dbi, false)
-
-	if err != nil {
-		ErrorServer(err, c)
-		return
-	}
-
-	if domainModel == nil || !domainModel.IsActive {
-		ErrorNotFound(errors.New("domain is not approved yet"), c)
 		return
 	}
 
