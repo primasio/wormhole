@@ -19,21 +19,23 @@ package models
 import (
 	"encoding/base64"
 	"errors"
+	"math/big"
+	"time"
+
 	"github.com/jinzhu/gorm"
 	"github.com/primasio/wormhole/util"
 	"golang.org/x/crypto/sha3"
-	"math/big"
-	"time"
 )
 
 type User struct {
 	BaseModel
-	UniqueID string `json:"id" gorm:"type:varchar(128);unique_index"`
-	Username string `json:"-" gorm:"type:varchar(128);index"`
-	Password string `json:"-"`
-	Salt     string `json:"-"`
-	Nickname string `json:"nickname"`
-	Balance  string `json:"balance"`
+	UniqueID  string `json:"id" gorm:"type:varchar(128);unique_index"`
+	Username  string `json:"-" gorm:"type:varchar(128);index"`
+	Password  string `json:"-"`
+	Salt      string `json:"-"`
+	Nickname  string `json:"nickname"`
+	AvatarURL string `json:"avatar_url"`
+	Balance   string `json:"balance"`
 }
 
 func (user *User) VerifyPassword(password string) bool {

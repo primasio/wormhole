@@ -53,6 +53,7 @@ func getMigrations() []*gormigrate.Migration {
 	migrations := initialTables()
 
 	migrations = append(migrations, Migration20180911()...)
+	migrations = append(migrations, Migration20181109()...)
 
 	return migrations
 }
