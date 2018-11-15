@@ -95,3 +95,14 @@ func TestURLContentController_Get(t *testing.T) {
 	log.Println(w.Body.String())
 	assert.Equal(t, w.Code, 200)
 }
+
+func TestURLContentController_List(t *testing.T) {
+
+	req, _ := http.NewRequest("GET", "/v1/urls", nil)
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	log.Println(w.Body.String())
+	assert.Equal(t, w.Code, 200)
+}
