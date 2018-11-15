@@ -20,11 +20,12 @@ import (
 	"testing"
 
 	"github.com/magiconair/properties/assert"
+
 	"github.com/primasio/wormhole/service"
 )
 
-func TestGetURLContentCommentVote(t *testing.T) {
-	uccVote := service.GetURLContentCommentVote()
-	uccVote2 := service.GetURLContentCommentVote()
-	assert.Equal(t, uccVote, uccVote2)
+func TestGetIntegration(t *testing.T) {
+	ig := service.GetIntegration()
+	ig2 := service.GetIntegration()
+	assert.Equal(t, ig, ig2)
 }
