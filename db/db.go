@@ -17,12 +17,13 @@
 package db
 
 import (
+	"io/ioutil"
+	"os"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/primasio/wormhole/config"
-	"io/ioutil"
-	"os"
 )
 
 const (
@@ -69,4 +70,11 @@ func Init() error {
 	instance.Set("gorm:table_options", "charset=utf8mb4")
 
 	return nil
+}
+
+func ForUpdate(tx *gorm.DB) *gorm.DB {
+	if GetDbType() != SQLITE {
+		return tx.Set("gorm:query_option", "FOR UPDATE")
+	}
+	return tx
 }

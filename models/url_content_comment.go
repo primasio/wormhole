@@ -18,6 +18,7 @@ package models
 
 import (
 	"errors"
+
 	"github.com/jinzhu/gorm"
 	"github.com/primasio/wormhole/util"
 )
@@ -29,6 +30,9 @@ type URLContentComment struct {
 	UserID       uint   `json:"-"`
 	URLContentId uint   `json:"-"`
 	Content      string `gorm:"type:longtext" json:"content"`
+
+	CommentUpVotes   uint `json:"comment_up_votes" gorm:"type:INT(11);default:0"`
+	CommentDownVotes uint `json:"comment_down_votes" gorm:"type:INT(11);default:0"`
 
 	User User `gorm:"save_associations:false" json:"user"`
 
@@ -56,5 +60,31 @@ func (comment *URLContentComment) SetUniqueID(db *gorm.DB) error {
 			// Must be error from other parts
 			return errors.New("too many iterations while generating new session key")
 		}
+	}
+}
+
+func (comment *URLContentComment) IncrementVote(like bool) {
+	if like {
+		comment.CommentUpVotes++
+	} else {
+		comment.CommentDownVotes++
+	}
+}
+
+func (comment *URLContentComment) SwitchVote(like bool) {
+	if like {
+		comment.CommentUpVotes++
+		comment.CommentDownVotes--
+	} else {
+		comment.CommentUpVotes--
+		comment.CommentDownVotes++
+	}
+}
+
+func (comment *URLContentComment) CancelVote(like bool) {
+	if like {
+		comment.CommentUpVotes--
+	} else {
+		comment.CommentDownVotes--
 	}
 }

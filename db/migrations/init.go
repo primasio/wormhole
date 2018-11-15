@@ -54,6 +54,7 @@ func getMigrations() []*gormigrate.Migration {
 
 	migrations = append(migrations, Migration20180911()...)
 	migrations = append(migrations, Migration20181109()...)
+	migrations = append(migrations, Migration20181113()...)
 
 	return migrations
 }

@@ -7,6 +7,12 @@ http:
     host: 127.0.0.1
     port: 8080
 
+integration:
+  register: 30
+  url_content_comment_vote:
+    like: 3
+    hate: -3
+
 cache:
   type: memory
 

@@ -18,6 +18,10 @@ package main
 
 import (
 	"flag"
+	"math/rand"
+	"os"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
 	"github.com/primasio/wormhole/cache"
@@ -25,9 +29,7 @@ import (
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/db/migrations"
 	"github.com/primasio/wormhole/http/server"
-	"math/rand"
-	"os"
-	"time"
+	"github.com/primasio/wormhole/worker"
 )
 
 func main() {
@@ -89,6 +91,9 @@ func main() {
 		glog.Error(err)
 		os.Exit(1)
 	}
+
+	w := worker.NewRegisterIntegrationWorker()
+	go w.Run()
 
 	// Start HTTP server
 	server.Init()

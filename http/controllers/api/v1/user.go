@@ -109,7 +109,7 @@ func (ctrl *UserController) Auth(c *gin.Context) {
 		user := &models.User{Username: login.Username}
 
 		dbi := db.GetDb()
-		dbi.First(&user)
+		dbi.Where("username = ?", user.Username).First(&user)
 
 		if user.ID == 0 {
 			ErrorUnauthorized("User not found", c)

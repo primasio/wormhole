@@ -54,6 +54,29 @@ func PrepareURLContent() (error, *models.URLContent) {
 	return nil, urlContent
 }
 
+func PrepareURLContentWithUser(user *models.User) (*models.URLContent, error) {
+
+	err, domain := PrepareDomain()
+
+	if err != nil {
+		return nil, err
+	}
+
+	randStr := util.RandString(10)
+
+	urlContent := &models.URLContent{
+		URL:    "https://" + domain.Domain + "/12345" + randStr,
+		UserID: user.ID,
+	}
+
+	urlContent.HashKey = models.GetURLHashKey(urlContent.URL)
+
+	dbi := db.GetDb()
+	dbi.Create(&urlContent)
+
+	return urlContent, nil
+}
+
 func TestURLContentController_Get(t *testing.T) {
 
 	err, urlContent := PrepareURLContent()

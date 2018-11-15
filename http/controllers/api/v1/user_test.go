@@ -17,8 +17,6 @@
 package v1_test
 
 import (
-	"github.com/magiconair/properties/assert"
-	"github.com/primasio/wormhole/tests"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -26,7 +24,30 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/magiconair/properties/assert"
+	"github.com/primasio/wormhole/db"
+	"github.com/primasio/wormhole/models"
+	"github.com/primasio/wormhole/tests"
 )
+
+func PrepareTestUser() (*models.User, error) {
+	user, err := tests.CreateTestUser()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dbi := db.GetDb()
+
+	if err := user.SetUniqueID(dbi); err != nil {
+		log.Fatal(err)
+	}
+
+	dbi.Create(&user)
+
+	return user, nil
+}
 
 func TestUserController_Create(t *testing.T) {
 
