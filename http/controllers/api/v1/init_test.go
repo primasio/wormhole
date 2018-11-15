@@ -18,12 +18,6 @@ package v1_test
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/magiconair/properties/assert"
-	"github.com/primasio/wormhole/db"
-	"github.com/primasio/wormhole/http/server"
-	"github.com/primasio/wormhole/models"
-	"github.com/primasio/wormhole/tests"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -32,6 +26,13 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/magiconair/properties/assert"
+	"github.com/primasio/wormhole/db"
+	"github.com/primasio/wormhole/http/server"
+	"github.com/primasio/wormhole/models"
+	"github.com/primasio/wormhole/tests"
 )
 
 var router *gin.Engine

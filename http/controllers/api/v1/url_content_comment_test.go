@@ -18,10 +18,6 @@ package v1_test
 
 import (
 	"errors"
-	"github.com/magiconair/properties/assert"
-	"github.com/primasio/wormhole/db"
-	"github.com/primasio/wormhole/models"
-	"github.com/primasio/wormhole/util"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -29,6 +25,11 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/magiconair/properties/assert"
+	"github.com/primasio/wormhole/db"
+	"github.com/primasio/wormhole/models"
+	"github.com/primasio/wormhole/util"
 )
 
 func PrepareURLContentComment(content *models.URLContent) (error, *models.URLContentComment) {
@@ -59,6 +60,32 @@ func PrepareURLContentComment(content *models.URLContent) (error, *models.URLCon
 	dbi.Save(content)
 
 	return nil, urlContentComment
+}
+
+func PrepareURLContentCommentWithContent(content *models.URLContent) (*models.URLContentComment, error) {
+	dbi := db.GetDb()
+
+	randStr := util.RandString(10)
+
+	urlContentComment := &models.URLContentComment{
+		UserID:       content.UserID,
+		Content:      "Comment " + randStr,
+		URLContentId: content.ID,
+	}
+
+	err := urlContentComment.SetUniqueID(dbi)
+
+	if err != nil {
+		return nil, err
+	}
+
+	dbi.Create(&urlContentComment)
+
+	content.TotalComment++
+
+	dbi.Save(content)
+
+	return urlContentComment, nil
 }
 
 func TestURLContentCommentController_Create(t *testing.T) {
@@ -117,6 +144,41 @@ func TestURLContentCommentController_List(t *testing.T) {
 
 	log.Println(w2.Body.String())
 	assert.Equal(t, w2.Code, 200)
+}
+
+func TestURLContentCommentController_ListWithVote(t *testing.T) {
+
+	ResetDB()
+
+	err, urlContent := PrepareURLContent()
+	assert.Equal(t, err, nil)
+
+	for i := 0; i < 30; i++ {
+		err, _ := PrepareURLContentComment(urlContent)
+		assert.Equal(t, err, nil)
+	}
+
+	urlEscaped := url.QueryEscape(urlContent.URL)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/v1/authorized/comments?url="+urlEscaped, nil)
+
+	router.ServeHTTP(w, req)
+
+	log.Println(w.Body.String())
+	assert.Equal(t, w.Code, 401)
+
+	PrepareAuthToken(t)
+
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("GET", "/v1/authorized/comments?url="+urlEscaped, nil)
+	req.Header.Add("Authorization", authToken)
+
+	router.ServeHTTP(w, req)
+
+	log.Println(w.Body.String())
+	assert.Equal(t, w.Code, 200)
+
 }
 
 func TestURLContentCommentController_Delete(t *testing.T) {

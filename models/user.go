@@ -19,21 +19,26 @@ package models
 import (
 	"encoding/base64"
 	"errors"
+	"math/big"
+	"time"
+
 	"github.com/jinzhu/gorm"
 	"github.com/primasio/wormhole/util"
 	"golang.org/x/crypto/sha3"
-	"math/big"
-	"time"
 )
 
 type User struct {
 	BaseModel
-	UniqueID string `json:"id" gorm:"type:varchar(128);unique_index"`
-	Username string `json:"-" gorm:"type:varchar(128);index"`
-	Password string `json:"-"`
-	Salt     string `json:"-"`
-	Nickname string `json:"nickname"`
-	Balance  string `json:"balance"`
+	UniqueID         string `json:"id" gorm:"type:varchar(128);unique_index"`
+	Username         string `json:"-" gorm:"type:varchar(128);index"`
+	Password         string `json:"-"`
+	Salt             string `json:"-"`
+	Nickname         string `json:"nickname"`
+	AvatarURL        string `json:"avatar_url"`
+	Integration      int64  `json:"integration" gorm:"type:INT(18);default:0"`
+	CommentUpVotes   uint   `json:"comment_up_votes" gorm:"type:INT(11);default:0"`
+	CommentDownVotes uint   `json:"comment_down_votes" gorm:"type:INT(11);default:0"`
+	Balance          string `json:"balance"`
 }
 
 func (user *User) VerifyPassword(password string) bool {
@@ -111,4 +116,34 @@ func (user *User) SetUniqueID(db *gorm.DB) error {
 			return errors.New("too many iterations while generating new session key")
 		}
 	}
+}
+
+func (user *User) IncrementCommentVote(like bool) {
+	if like {
+		user.CommentUpVotes++
+	} else {
+		user.CommentDownVotes++
+	}
+}
+
+func (user *User) SwitchCommentVote(like bool) {
+	if like {
+		user.CommentUpVotes++
+		user.CommentDownVotes--
+	} else {
+		user.CommentDownVotes++
+		user.CommentUpVotes--
+	}
+}
+
+func (user *User) CancelCommentVote(like bool) {
+	if like {
+		user.CommentUpVotes--
+	} else {
+		user.CommentDownVotes--
+	}
+}
+
+func (user *User) IncrementIntegration(score int64) {
+	user.Integration += score
 }

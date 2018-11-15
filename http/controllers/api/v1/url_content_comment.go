@@ -26,6 +26,7 @@ import (
 	"github.com/primasio/wormhole/http/captcha"
 	"github.com/primasio/wormhole/http/middlewares"
 	"github.com/primasio/wormhole/models"
+	"github.com/primasio/wormhole/service"
 )
 
 type URLContentCommentController struct{}
@@ -234,5 +235,40 @@ func (ctrl *URLContentCommentController) List(c *gin.Context) {
 		}
 
 		Success(commentList, c)
+	}
+}
+
+func (ctrl *URLContentCommentController) ListWithVote(c *gin.Context) {
+	page, err := strconv.Atoi(c.Query("page"))
+
+	if err != nil {
+		page = 0
+	}
+
+	pageSize := 20
+	offsetNum := page * pageSize
+
+	url := c.Query("url")
+
+	if url == "" {
+		Error("missing query param url", c)
+		return
+	}
+
+	dbi := db.GetDb()
+	if err, urlContent := models.GetURLContentByURL(url, dbi, false); err != nil {
+		ErrorServer(err, c)
+		return
+	} else {
+
+		if urlContent == nil {
+			Success(make([]interface{}, 0), c)
+			return
+		}
+
+		userID, _ := c.Get(middlewares.AuthorizedUserId)
+		items := service.GetURLContentComment().ListWithVote(userID.(uint), urlContent, page, pageSize, offsetNum)
+
+		Success(items, c)
 	}
 }

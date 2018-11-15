@@ -18,6 +18,7 @@ package oauth
 
 import (
 	"errors"
+
 	"github.com/primasio/wormhole/db"
 	"github.com/primasio/wormhole/models"
 )
@@ -57,6 +58,7 @@ func (oauthResult *OAuthResult) Process() (err error, userId uint) {
 	user := &models.User{}
 	user.Username = ""
 	user.Password = ""
+	user.AvatarURL = oauthResult.AvatarURL
 
 	if oauthResult.Name != "" {
 		user.Nickname = oauthResult.Name

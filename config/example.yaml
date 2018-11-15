@@ -7,6 +7,12 @@ db:
   type: sqlite3
   connection: data/db.sqlite
 
+integration:
+  register: 30
+  url_content_comment_vote:
+    like: 3
+    hate: -3
+
 http:
   server:
     host: 127.0.0.1

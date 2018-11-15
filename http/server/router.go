@@ -126,6 +126,16 @@ func NewRouter() *gin.Engine {
 		{
 			urlContentCommentGroupAuthorized.POST("", urlContentCommentCtrl.Create)
 			urlContentCommentGroupAuthorized.DELETE("/:comment_id", urlContentCommentCtrl.Delete)
+
+			urlContentCommentVoteCtrl := new(v1.URLContentCommentVoteController)
+			urlContentCommentGroupAuthorized.POST("/:comment_id/votes", urlContentCommentVoteCtrl.Create)
+			urlContentCommentGroupAuthorized.PUT("/:comment_id/votes", urlContentCommentVoteCtrl.Update)
+			urlContentCommentGroupAuthorized.DELETE("/:comment_id/votes", urlContentCommentVoteCtrl.Delete)
+		}
+
+		authorizedUserGroup := v1g.Group("authorized").Use(middlewares.AuthMiddleware())
+		{
+			authorizedUserGroup.GET("/comments", urlContentCommentCtrl.ListWithVote)
 		}
 	}
 
